@@ -12,6 +12,7 @@
 #include "../common.h"
 #include "IDrawingContext.h"
 #include "IDrawingEngine.h"
+#include "InvalidationGrid.hpp"
 
 #include <memory>
 
@@ -75,6 +76,7 @@ namespace OpenRCT2
             uint8_t* _bits = nullptr;
 
             DirtyGrid _dirtyGrid = {};
+            InvalidationGrid _invalidationGrid;
 
             DrawPixelInfo _bitsDPI = {};
 

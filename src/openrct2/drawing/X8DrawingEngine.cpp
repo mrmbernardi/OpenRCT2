@@ -154,6 +154,8 @@ void X8DrawingEngine::SetVSync([[maybe_unused]] bool vsync)
 
 void X8DrawingEngine::Invalidate(int32_t left, int32_t top, int32_t right, int32_t bottom)
 {
+    _invalidationGrid.Invalidate(left, top, right, bottom);
+    /*
     left = std::max(left, 0);
     top = std::max(top, 0);
     right = std::min(right, static_cast<int32_t>(_width));
@@ -182,6 +184,7 @@ void X8DrawingEngine::Invalidate(int32_t left, int32_t top, int32_t right, int32
             screenDirtyBlocks[yOffset + x] = 0xFF;
         }
     }
+    */
 }
 
 void X8DrawingEngine::BeginDraw()
@@ -336,7 +339,7 @@ void X8DrawingEngine::ConfigureBits(uint32_t width, uint32_t height, uint32_t pi
     dpi->height = height;
     dpi->pitch = _pitch - width;
 
-    ConfigureDirtyGrid();
+    _invalidationGrid.Reset(_width, _height);
 
     if (LightFXIsAvailable())
     {
@@ -360,47 +363,14 @@ void X8DrawingEngine::ConfigureDirtyGrid()
 
     delete[] _dirtyGrid.Blocks;
     _dirtyGrid.Blocks = new uint8_t[_dirtyGrid.BlockColumns * _dirtyGrid.BlockRows];
+
+    _invalidationGrid.Reset(_width, _height);
 }
 
 void X8DrawingEngine::DrawAllDirtyBlocks()
 {
-    // TODO: For optimal performance it is currently limited to a single column.
-    // The optimal approach would be to extract all dirty regions as rectangles not including
-    // parts that are not marked dirty and have the grid more fine grained.
-    // A situation like following:
-    //
-    //   0 1 2 3 4 5 6 7 8 9
-    //   1 - - - - - - - - -
-    //   2 - x x x x - - - -
-    //   3 - x x - - - - - -
-    //   4 - - - - - - - - -
-    //   5 - - - - - - - - -
-    //   6 - - - - - - - - -
-    //   7 - - - - - - - - -
-    //   8 - - - - - - - - -
-    //   9 - - - - - - - - -
-    //
-    // Would currently redraw {2,2} to {3,5} where {3,4} and {3,5} are not dirty. Choosing to do this
-    // per column eliminates this issue but limits it to rendering just a single column at a time.
-
-    for (uint32_t x = 0; x < _dirtyGrid.BlockColumns; x++)
-    {
-        for (uint32_t y = 0; y < _dirtyGrid.BlockRows; y++)
-        {
-            uint32_t yOffset = y * _dirtyGrid.BlockColumns;
-            if (_dirtyGrid.Blocks[yOffset + x] == 0)
-            {
-                continue;
-            }
-
-            // See comment above as to why this is 1.
-            const uint32_t columns = 1;
-
-            // Check rows
-            auto rows = GetNumDirtyRows(x, y, columns);
-            DrawDirtyBlocks(x, y, columns, rows);
-        }
-    }
+    _invalidationGrid.TraverseDirtyCells(
+        [this](int32_t x, int32_t y, int32_t columns, int32_t rows) { DrawDirtyBlocks(x, y, columns, rows); });
 }
 
 uint32_t X8DrawingEngine::GetNumDirtyRows(const uint32_t x, const uint32_t y, const uint32_t columns)
@@ -423,19 +393,6 @@ uint32_t X8DrawingEngine::GetNumDirtyRows(const uint32_t x, const uint32_t y, co
 
 void X8DrawingEngine::DrawDirtyBlocks(uint32_t x, uint32_t y, uint32_t columns, uint32_t rows)
 {
-    uint32_t dirtyBlockColumns = _dirtyGrid.BlockColumns;
-    uint8_t* screenDirtyBlocks = _dirtyGrid.Blocks;
-
-    // Unset dirty blocks
-    for (uint32_t top = y; top < y + rows; top++)
-    {
-        uint32_t topOffset = top * dirtyBlockColumns;
-        for (uint32_t left = x; left < x + columns; left++)
-        {
-            screenDirtyBlocks[topOffset + left] = 0;
-        }
-    }
-
     // Determine region in pixels
     uint32_t left = std::max<uint32_t>(0, x * _dirtyGrid.BlockWidth);
     uint32_t top = std::max<uint32_t>(0, y * _dirtyGrid.BlockHeight);
