@@ -129,7 +129,6 @@ X8DrawingEngine::X8DrawingEngine([[maybe_unused]] const std::shared_ptr<Ui::IUiC
 X8DrawingEngine::~X8DrawingEngine()
 {
     delete _drawingContext;
-    delete[] _dirtyGrid.Blocks;
     delete[] _bits;
 }
 
@@ -155,36 +154,6 @@ void X8DrawingEngine::SetVSync([[maybe_unused]] bool vsync)
 void X8DrawingEngine::Invalidate(int32_t left, int32_t top, int32_t right, int32_t bottom)
 {
     _invalidationGrid.Invalidate(left, top, right, bottom);
-    /*
-    left = std::max(left, 0);
-    top = std::max(top, 0);
-    right = std::min(right, static_cast<int32_t>(_width));
-    bottom = std::min(bottom, static_cast<int32_t>(_height));
-
-    if (left >= right)
-        return;
-    if (top >= bottom)
-        return;
-
-    right--;
-    bottom--;
-
-    left >>= _dirtyGrid.BlockShiftX;
-    right >>= _dirtyGrid.BlockShiftX;
-    top >>= _dirtyGrid.BlockShiftY;
-    bottom >>= _dirtyGrid.BlockShiftY;
-
-    uint32_t dirtyBlockColumns = _dirtyGrid.BlockColumns;
-    uint8_t* screenDirtyBlocks = _dirtyGrid.Blocks;
-    for (int16_t y = top; y <= bottom; y++)
-    {
-        uint32_t yOffset = y * dirtyBlockColumns;
-        for (int16_t x = left; x <= right; x++)
-        {
-            screenDirtyBlocks[yOffset + x] = 0xFF;
-        }
-    }
-    */
 }
 
 void X8DrawingEngine::BeginDraw()
@@ -352,52 +321,22 @@ void X8DrawingEngine::OnDrawDirtyBlock(
 {
 }
 
-void X8DrawingEngine::ConfigureDirtyGrid()
-{
-    _dirtyGrid.BlockShiftX = 7;
-    _dirtyGrid.BlockShiftY = 5; // Keep column at 32 (1 << 5)
-    _dirtyGrid.BlockWidth = 1 << _dirtyGrid.BlockShiftX;
-    _dirtyGrid.BlockHeight = 1 << _dirtyGrid.BlockShiftY;
-    _dirtyGrid.BlockColumns = (_width >> _dirtyGrid.BlockShiftX) + 1;
-    _dirtyGrid.BlockRows = (_height >> _dirtyGrid.BlockShiftY) + 1;
-
-    delete[] _dirtyGrid.Blocks;
-    _dirtyGrid.Blocks = new uint8_t[_dirtyGrid.BlockColumns * _dirtyGrid.BlockRows];
-
-    _invalidationGrid.Reset(_width, _height);
-}
-
 void X8DrawingEngine::DrawAllDirtyBlocks()
 {
     _invalidationGrid.TraverseDirtyCells(
         [this](int32_t x, int32_t y, int32_t columns, int32_t rows) { DrawDirtyBlocks(x, y, columns, rows); });
 }
 
-uint32_t X8DrawingEngine::GetNumDirtyRows(const uint32_t x, const uint32_t y, const uint32_t columns)
-{
-    uint32_t yy = y;
-
-    for (yy = y; yy < _dirtyGrid.BlockRows; yy++)
-    {
-        uint32_t yyOffset = yy * _dirtyGrid.BlockColumns;
-        for (uint32_t xx = x; xx < x + columns; xx++)
-        {
-            if (_dirtyGrid.Blocks[yyOffset + xx] == 0)
-            {
-                return yy - y;
-            }
-        }
-    }
-    return yy - y;
-}
-
 void X8DrawingEngine::DrawDirtyBlocks(uint32_t x, uint32_t y, uint32_t columns, uint32_t rows)
 {
+    const auto blockWidth = _invalidationGrid.GetBlockWidth();
+    const auto blockHeight = _invalidationGrid.GetBlockHeight();
+    
     // Determine region in pixels
-    uint32_t left = std::max<uint32_t>(0, x * _dirtyGrid.BlockWidth);
-    uint32_t top = std::max<uint32_t>(0, y * _dirtyGrid.BlockHeight);
-    uint32_t right = std::min(_width, left + (columns * _dirtyGrid.BlockWidth));
-    uint32_t bottom = std::min(_height, top + (rows * _dirtyGrid.BlockHeight));
+    uint32_t left = std::max<uint32_t>(0, x * blockWidth);
+    uint32_t top = std::max<uint32_t>(0, y * blockHeight);
+    uint32_t right = std::min(_width, left + (columns * blockWidth));
+    uint32_t bottom = std::min(_height, top + (rows * blockHeight));
     if (right <= left || bottom <= top)
     {
         return;

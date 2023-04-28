@@ -308,7 +308,7 @@ private:
     uint32_t GetDirtyVisualTime(uint32_t x, uint32_t y)
     {
         uint32_t result = 0;
-        uint32_t i = y * _dirtyGrid.BlockColumns + x;
+        uint32_t i = y * _invalidationGrid.GetColumns() + x;
         if (_dirtyVisualsTime.size() > i)
         {
             result = _dirtyVisualsTime[i];
@@ -318,7 +318,7 @@ private:
 
     void SetDirtyVisualTime(uint32_t x, uint32_t y, uint32_t value)
     {
-        uint32_t i = y * _dirtyGrid.BlockColumns + x;
+        uint32_t i = y * _invalidationGrid.GetColumns() + x;
         if (_dirtyVisualsTime.size() > i)
         {
             _dirtyVisualsTime[i] = value;
@@ -327,10 +327,13 @@ private:
 
     void UpdateDirtyVisuals()
     {
-        _dirtyVisualsTime.resize(_dirtyGrid.BlockRows * _dirtyGrid.BlockColumns);
-        for (uint32_t y = 0; y < _dirtyGrid.BlockRows; y++)
+        const auto blockRows = _invalidationGrid.GetRows();
+        const auto blockCols = _invalidationGrid.GetColumns();
+        
+        _dirtyVisualsTime.resize(blockRows * blockCols);
+        for (uint32_t y = 0; y < blockRows; y++)
         {
-            for (uint32_t x = 0; x < _dirtyGrid.BlockColumns; x++)
+            for (uint32_t x = 0; x < blockCols; x++)
             {
                 auto timeLeft = GetDirtyVisualTime(x, y);
                 if (timeLeft > 0)
@@ -343,13 +346,18 @@ private:
 
     void RenderDirtyVisuals()
     {
+        const auto blockRows = _invalidationGrid.GetRows();
+        const auto blockCols = _invalidationGrid.GetColumns();
+        const auto blockWidth = _invalidationGrid.GetBlockWidth();
+        const auto blockHeight = _invalidationGrid.GetBlockHeight();
+        
         float scaleX = gConfigGeneral.WindowScale;
         float scaleY = gConfigGeneral.WindowScale;
 
         SDL_SetRenderDrawBlendMode(_sdlRenderer, SDL_BLENDMODE_BLEND);
-        for (uint32_t y = 0; y < _dirtyGrid.BlockRows; y++)
+        for (uint32_t y = 0; y < blockRows; y++)
         {
-            for (uint32_t x = 0; x < _dirtyGrid.BlockColumns; x++)
+            for (uint32_t x = 0; x < blockCols; x++)
             {
                 auto timeLeft = GetDirtyVisualTime(x, y);
                 if (timeLeft > 0)
@@ -357,10 +365,10 @@ private:
                     uint8_t alpha = static_cast<uint8_t>(timeLeft * 5 / 2);
 
                     SDL_Rect ddRect;
-                    ddRect.x = static_cast<int32_t>(x * _dirtyGrid.BlockWidth * scaleX);
-                    ddRect.y = static_cast<int32_t>(y * _dirtyGrid.BlockHeight * scaleY);
-                    ddRect.w = static_cast<int32_t>(_dirtyGrid.BlockWidth * scaleX);
-                    ddRect.h = static_cast<int32_t>(_dirtyGrid.BlockHeight * scaleY);
+                    ddRect.x = static_cast<int32_t>(x * blockWidth * scaleX);
+                    ddRect.y = static_cast<int32_t>(y * blockHeight * scaleY);
+                    ddRect.w = static_cast<int32_t>(blockWidth * scaleX);
+                    ddRect.h = static_cast<int32_t>(blockHeight * scaleY);
 
                     SDL_SetRenderDrawColor(_sdlRenderer, 255, 255, 255, alpha);
                     SDL_RenderFillRect(_sdlRenderer, &ddRect);

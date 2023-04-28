@@ -27,17 +27,6 @@ namespace OpenRCT2
     {
         class X8DrawingContext;
 
-        struct DirtyGrid
-        {
-            uint32_t BlockShiftX;
-            uint32_t BlockShiftY;
-            uint32_t BlockWidth;
-            uint32_t BlockHeight;
-            uint32_t BlockColumns;
-            uint32_t BlockRows;
-            uint8_t* Blocks;
-        };
-
         class X8WeatherDrawer final : public IWeatherDrawer
         {
         private:
@@ -75,7 +64,6 @@ namespace OpenRCT2
             size_t _bitsSize = 0;
             uint8_t* _bits = nullptr;
 
-            DirtyGrid _dirtyGrid = {};
             InvalidationGrid _invalidationGrid;
 
             DrawPixelInfo _bitsDPI = {};
@@ -121,9 +109,7 @@ namespace OpenRCT2
             virtual void OnDrawDirtyBlock(uint32_t x, uint32_t y, uint32_t columns, uint32_t rows);
 
         private:
-            void ConfigureDirtyGrid();
             void DrawAllDirtyBlocks();
-            uint32_t GetNumDirtyRows(const uint32_t x, const uint32_t y, const uint32_t columns);
             void DrawDirtyBlocks(uint32_t x, uint32_t y, uint32_t columns, uint32_t rows);
         };
 #ifdef __WARN_SUGGEST_FINAL_TYPES__

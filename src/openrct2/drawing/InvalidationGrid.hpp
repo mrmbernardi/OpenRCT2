@@ -19,6 +19,26 @@ namespace OpenRCT2
         std::vector<uint8_t> _blocks;
 
     public:
+        uint32_t GetRows() const
+        {
+            return _blockRows;
+        }
+
+        uint32_t GetColumns() const
+        {
+            return _blockColumns;
+        }
+
+        uint32_t GetBlockWidth() const
+        {
+            return _blockWidth;
+        }
+
+        uint32_t GetBlockHeight() const
+        {
+            return _blockHeight;
+        }
+
         void Reset(int32_t width, int32_t height)
         {
             _blockShiftX = 7;
