@@ -329,7 +329,7 @@ private:
     {
         const auto blockRows = _invalidationGrid.GetRows();
         const auto blockCols = _invalidationGrid.GetColumns();
-        
+
         _dirtyVisualsTime.resize(blockRows * blockCols);
         for (uint32_t y = 0; y < blockRows; y++)
         {
@@ -350,7 +350,7 @@ private:
         const auto blockCols = _invalidationGrid.GetColumns();
         const auto blockWidth = _invalidationGrid.GetBlockWidth();
         const auto blockHeight = _invalidationGrid.GetBlockHeight();
-        
+
         float scaleX = gConfigGeneral.WindowScale;
         float scaleY = gConfigGeneral.WindowScale;
 

@@ -38,6 +38,9 @@
 #    define glTexImage3D __static__glTexImage3D
 #    define glGetIntegerv __static__glGetIntegerv
 #    define glGetTexImage __static__glGetTexImage
+#    define glRasterPos2i __static__glRasterPos2i
+#    define glDrawPixels __static__glDrawPixels
+#    define glTexSubImage2D __static__glTexSubImage2D
 
 #endif
 
@@ -74,6 +77,9 @@
 #    undef glTexImage3D
 #    undef glGetIntegerv
 #    undef glGetTexImage
+#    undef glRasterPos2i
+#    undef glDrawPixels
+#    undef glTexSubImage2D
 
 // 1.1 function signatures
 using PFNGLBEGINPROC = void(APIENTRYP)(GLenum mode);
@@ -106,6 +112,13 @@ using PFNGLTEXIMAGE3DPROC = void(APIENTRYP)(
     GLenum type, const GLvoid* data);
 using PFNGLGETINTERGERVPROC = void(APIENTRYP)(GLenum pname, GLint* data);
 using PFNGLGETTEXIMAGEPROC = void(APIENTRYP)(GLenum target, GLint level, GLenum format, GLenum type, GLvoid* img);
+
+// 2.0+
+using PFNGLRASTERPOS2IPROC = void(APIENTRYP)(GLint x, GLint y);
+using PFNGLDRAWPIXELS = void(APIENTRYP)(GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid* pixels);
+using PFNGLTEXSUBIMAGE2D = void(APIENTRYP)(
+    GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type,
+    const GLvoid* pixels);
 
 #    define OPENGL_PROC(TYPE, PROC) extern TYPE PROC;
 #    include "OpenGLAPIProc.h"

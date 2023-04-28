@@ -56,6 +56,7 @@ namespace OpenRCT2::Ui
         void BindDraw() const;
         void BindRead() const;
         void GetPixels(DrawPixelInfo& dpi) const;
+        void SetPixels(const DrawPixelInfo& dpi);
 
         void SwapColourBuffer(OpenGLFramebuffer& other);
         GLuint SwapDepthTexture(GLuint depth);

@@ -31,6 +31,7 @@
 #    include <openrct2/drawing/Drawing.h>
 #    include <openrct2/drawing/IDrawingContext.h>
 #    include <openrct2/drawing/IDrawingEngine.h>
+#    include <openrct2/drawing/InvalidationGrid.hpp>
 #    include <openrct2/drawing/LightFX.h>
 #    include <openrct2/drawing/Weather.h>
 #    include <openrct2/interface/Screenshot.h>
@@ -90,6 +91,11 @@ public:
         return _textureCache.get();
     }
     const OpenGLFramebuffer& GetFinalFramebuffer() const
+    {
+        return _swapFramebuffer->GetFinalFramebuffer();
+    }
+
+    OpenGLFramebuffer& GetFinalFramebuffer()
     {
         return _swapFramebuffer->GetFinalFramebuffer();
     }
@@ -194,6 +200,7 @@ private:
     std::unique_ptr<OpenGLFramebuffer> _scaleFramebuffer;
     std::unique_ptr<OpenGLFramebuffer> _smoothScaleFramebuffer;
     OpenGLWeatherDrawer _weatherDrawer;
+    InvalidationGrid _invalidationGrid;
 
 public:
     SDL_Color Palette[256];
@@ -245,6 +252,8 @@ public:
         ConfigureBits(width, height, width);
         ConfigureCanvas();
         _drawingContext->Resize(width, height);
+
+        _invalidationGrid.Reset(width, height);
     }
 
     void SetPalette(const GamePalette& palette) override
@@ -278,6 +287,7 @@ public:
 
     void Invalidate(int32_t left, int32_t top, int32_t right, int32_t bottom) override
     {
+        _invalidationGrid.Invalidate(left, top, right, bottom);
     }
 
     void BeginDraw() override
@@ -326,7 +336,32 @@ public:
         _drawingContext->CalculcateClipping(_bitsDPI);
 
         WindowUpdateAllViewports();
-        WindowDrawAll(_bitsDPI, 0, 0, _width, _height);
+        DrawAllDirtyBlocks();
+    }
+
+    void DrawAllDirtyBlocks()
+    {
+        _invalidationGrid.TraverseDirtyCells(
+            [this](int32_t x, int32_t y, int32_t columns, int32_t rows) { DrawDirtyBlocks(x, y, columns, rows); });
+    }
+
+    void DrawDirtyBlocks(uint32_t x, uint32_t y, uint32_t columns, uint32_t rows)
+    {
+        const auto blockWidth = _invalidationGrid.GetBlockWidth();
+        const auto blockHeight = _invalidationGrid.GetBlockHeight();
+
+        // Determine region in pixels
+        uint32_t left = std::max<uint32_t>(0, x * blockWidth);
+        uint32_t top = std::max<uint32_t>(0, y * blockHeight);
+        uint32_t right = std::min(_width, left + (columns * blockWidth));
+        uint32_t bottom = std::min(_height, top + (rows * blockHeight));
+        if (right <= left || bottom <= top)
+        {
+            return;
+        }
+
+        // Draw region
+        WindowDrawAll(_bitsDPI, left, top, right, bottom);
     }
 
     void PaintWeather() override
@@ -347,7 +382,48 @@ public:
 
     void CopyRect(int32_t x, int32_t y, int32_t width, int32_t height, int32_t dx, int32_t dy) override
     {
-        // Not applicable for this engine
+        if (dx == 0 && dy == 0)
+            return;
+
+        OpenGLFramebuffer& framebuffer = _drawingContext->GetFinalFramebuffer();
+        framebuffer.Bind();
+        framebuffer.GetPixels(_bitsDPI);
+
+        // Originally 0x00683359
+        // Adjust for move off screen
+        // NOTE: when zooming, there can be x, y, dx, dy combinations that go off the
+        // screen; hence the checks. This code should ultimately not be called when
+        // zooming because this function is specific to updating the screen on move
+        int32_t lmargin = std::min(x - dx, 0);
+        int32_t rmargin = std::min(static_cast<int32_t>(_width) - (x - dx + width), 0);
+        int32_t tmargin = std::min(y - dy, 0);
+        int32_t bmargin = std::min(static_cast<int32_t>(_height) - (y - dy + height), 0);
+        x -= lmargin;
+        y -= tmargin;
+        width += lmargin + rmargin;
+        height += tmargin + bmargin;
+
+        int32_t stride = _bitsDPI.width + _bitsDPI.pitch;
+        uint8_t* to = _bitsDPI.bits + y * stride + x;
+        uint8_t* from = _bitsDPI.bits + (y - dy) * stride + x - dx;
+
+        if (dy > 0)
+        {
+            // If positive dy, reverse directions
+            to += (height - 1) * stride;
+            from += (height - 1) * stride;
+            stride = -stride;
+        }
+
+        // Move bytes
+        for (int32_t i = 0; i < height; i++)
+        {
+            memmove(to, from, width);
+            to += stride;
+            from += stride;
+        }
+
+        framebuffer.SetPixels(_bitsDPI);
     }
 
     IDrawingContext* GetDrawingContext() override
@@ -362,7 +438,7 @@ public:
 
     DRAWING_ENGINE_FLAGS GetFlags() override
     {
-        return DEF_NONE;
+        return DEF_DIRTY_OPTIMISATIONS;
     }
 
     void InvalidateImage(uint32_t image) override

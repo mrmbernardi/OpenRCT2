@@ -331,7 +331,7 @@ void X8DrawingEngine::DrawDirtyBlocks(uint32_t x, uint32_t y, uint32_t columns, 
 {
     const auto blockWidth = _invalidationGrid.GetBlockWidth();
     const auto blockHeight = _invalidationGrid.GetBlockHeight();
-    
+
     // Determine region in pixels
     uint32_t left = std::max<uint32_t>(0, x * blockWidth);
     uint32_t top = std::max<uint32_t>(0, y * blockHeight);

@@ -40,6 +40,10 @@ namespace OpenRCT2::Ui
         {
             return _opaqueFramebuffer;
         }
+        OpenGLFramebuffer& GetFinalFramebuffer()
+        {
+            return _opaqueFramebuffer;
+        }
         GLuint GetBackDepthTexture() const
         {
             return _backDepth;
