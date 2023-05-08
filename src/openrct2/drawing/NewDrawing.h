@@ -27,5 +27,6 @@ void DrawingEngineDispose();
 
 DrawPixelInfo& DrawingEngineGetDpi();
 bool DrawingEngineHasDirtyOptimisations();
+bool DrawingEngineHasViewportShift();
 void DrawingEngineInvalidateImage(uint32_t image);
 void DrawingEngineSetVSync(bool vsync);

@@ -133,6 +133,17 @@ bool DrawingEngineHasDirtyOptimisations()
     return result;
 }
 
+bool DrawingEngineHasViewportShift()
+{
+    bool result = false;
+    auto drawingEngine = GetDrawingEngine();
+    if (drawingEngine != nullptr)
+    {
+        result = (drawingEngine->GetFlags() & DEF_VIEWPORT_SHIFT);
+    }
+    return result;
+}
+
 void DrawingEngineInvalidateImage(uint32_t image)
 {
     auto drawingEngine = GetDrawingEngine();

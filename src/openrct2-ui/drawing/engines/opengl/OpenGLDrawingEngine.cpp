@@ -335,6 +335,9 @@ public:
     {
         _drawingContext->CalculcateClipping(_bitsDPI);
 
+        // Redraw dirty regions before updating the viewports, otherwise
+        // when viewports get panned, they copy dirty pixels
+        DrawAllDirtyBlocks();
         WindowUpdateAllViewports();
         DrawAllDirtyBlocks();
     }

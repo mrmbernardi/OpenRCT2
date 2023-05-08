@@ -37,6 +37,14 @@ enum DRAWING_ENGINE_FLAGS
      * The drawing engine is capable of processing the drawing in parallel.
      */
     DEF_PARALLEL_DRAWING = 1 << 1,
+
+    /**
+     * The drawing engine is capable of shifting the viewport by copying pixels.
+     * This is currently a work-around to an issue where OpenGL with invalidation
+     * renders tiles with the wrong rotation so instead we invalidate the entire screen
+     * rather than copying the previous pixels.
+     */
+    DEF_VIEWPORT_SHIFT = 1 << 2,
 };
 
 struct DrawPixelInfo;
