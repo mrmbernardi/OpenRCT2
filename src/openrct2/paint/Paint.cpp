@@ -51,6 +51,7 @@ static constexpr uint8_t BoundBoxDebugColours[] = {
 };
 
 bool gShowDirtyVisuals;
+bool gForceRedraw;
 bool gPaintBoundingBoxes;
 bool gPaintBlockedTiles;
 

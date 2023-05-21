@@ -35,6 +35,7 @@
 #    include <openrct2/drawing/LightFX.h>
 #    include <openrct2/drawing/Weather.h>
 #    include <openrct2/interface/Screenshot.h>
+#    include <openrct2/paint/Paint.h>
 #    include <openrct2/ui/UiContext.h>
 #    include <openrct2/util/Util.h>
 #    include <openrct2/world/Climate.h>
@@ -335,11 +336,19 @@ public:
     {
         _drawingContext->CalculcateClipping(_bitsDPI);
 
-        // Redraw dirty regions before updating the viewports, otherwise
-        // when viewports get panned, they copy dirty pixels
-        DrawAllDirtyBlocks();
-        WindowUpdateAllViewports();
-        DrawAllDirtyBlocks();
+        if (gForceRedraw)
+        {
+            WindowUpdateAllViewports();
+            WindowDrawAll(_bitsDPI, 0, 0, _width, _height);
+        }
+        else
+        {
+            // Redraw dirty regions before updating the viewports, otherwise
+            // when viewports get panned, they copy dirty pixels
+            DrawAllDirtyBlocks();
+            WindowUpdateAllViewports();
+            DrawAllDirtyBlocks();
+        }
     }
 
     void DrawAllDirtyBlocks()

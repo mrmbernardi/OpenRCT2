@@ -17,6 +17,7 @@
 #include "../interface/Screenshot.h"
 #include "../interface/Viewport.h"
 #include "../interface/Window.h"
+#include "../paint/Paint.h"
 #include "../ui/UiContext.h"
 #include "../util/Util.h"
 #include "../world/Climate.h"
@@ -323,8 +324,15 @@ void X8DrawingEngine::OnDrawDirtyBlock(
 
 void X8DrawingEngine::DrawAllDirtyBlocks()
 {
-    _invalidationGrid.TraverseDirtyCells(
-        [this](int32_t x, int32_t y, int32_t columns, int32_t rows) { DrawDirtyBlocks(x, y, columns, rows); });
+    if (gForceRedraw)
+    {
+        WindowDrawAll(_bitsDPI, 0, 0, _width, _height);
+    }
+    else
+    {
+        _invalidationGrid.TraverseDirtyCells(
+            [this](int32_t x, int32_t y, int32_t columns, int32_t rows) { DrawDirtyBlocks(x, y, columns, rows); });
+    }
 }
 
 void X8DrawingEngine::DrawDirtyBlocks(uint32_t x, uint32_t y, uint32_t columns, uint32_t rows)

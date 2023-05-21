@@ -286,6 +286,7 @@ constexpr ImageId TrackStationColour = ImageId(0, COLOUR_BLACK);
 constexpr ImageId ShopSupportColour = ImageId(0, COLOUR_DARK_BROWN);
 
 extern bool gShowDirtyVisuals;
+extern bool gForceRedraw;
 extern bool gPaintBoundingBoxes;
 extern bool gPaintBlockedTiles;
 extern bool gPaintWidePathsAsGhost;
