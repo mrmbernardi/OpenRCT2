@@ -177,12 +177,15 @@ void X8DrawingEngine::EndDraw()
 void X8DrawingEngine::PaintWindows()
 {
     WindowResetVisibilities();
-
-    // Redraw dirty regions before updating the viewports, otherwise
-    // when viewports get panned, they copy dirty pixels
-    DrawAllDirtyBlocks();
     WindowUpdateAllViewports();
-    DrawAllDirtyBlocks();
+    if (gForceRedraw)
+    {
+        WindowDrawAll(_bitsDPI, 0, 0, _width, _height);
+    }
+    else
+    {
+        DrawAllDirtyBlocks();
+    }
 }
 
 void X8DrawingEngine::PaintWeather()
@@ -247,7 +250,7 @@ DrawPixelInfo* X8DrawingEngine::GetDrawingPixelInfo()
 
 DRAWING_ENGINE_FLAGS X8DrawingEngine::GetFlags()
 {
-    return static_cast<DRAWING_ENGINE_FLAGS>(DEF_DIRTY_OPTIMISATIONS | DEF_PARALLEL_DRAWING | DEF_VIEWPORT_SHIFT);
+    return static_cast<DRAWING_ENGINE_FLAGS>(DEF_DIRTY_OPTIMISATIONS | DEF_PARALLEL_DRAWING);
 }
 
 void X8DrawingEngine::InvalidateImage([[maybe_unused]] uint32_t image)

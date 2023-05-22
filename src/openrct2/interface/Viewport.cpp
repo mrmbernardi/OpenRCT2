@@ -578,19 +578,8 @@ static void ViewportMove(const ScreenCoordsXY& coords, WindowBase* w, Viewport* 
         return;
     }
 
-    if (DrawingEngineHasViewportShift())
-    {
-        DrawPixelInfo& dpi = DrawingEngineGetDpi();
-        ViewportShiftPixels(dpi, w, viewport, x_diff, y_diff);
-    }
-    else
-    {
-        // FIXME: OpenGL has some issues with invalidation by copying the pixels for some reasons.
-        // When starting the game the first frame would contain pixels from a different rotation
-        // somehow, resizing the window a bit or moving a window over the region will get to draw the
-        // correct pixels, this is currently a work-around and should be investigated to whats happening.
-        GfxInvalidateScreen();
-    }
+    DrawPixelInfo& dpi = DrawingEngineGetDpi();
+    ViewportShiftPixels(dpi, w, viewport, x_diff, y_diff);
 
     *viewport = view_copy;
 }
