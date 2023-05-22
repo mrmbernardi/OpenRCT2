@@ -336,23 +336,22 @@ public:
     {
         _drawingContext->CalculcateClipping(_bitsDPI);
 
+        WindowResetVisibilities();
+        WindowUpdateAllViewports();
         if (gForceRedraw)
         {
-            WindowUpdateAllViewports();
             WindowDrawAll(_bitsDPI, 0, 0, _width, _height);
         }
         else
         {
-            // Redraw dirty regions before updating the viewports, otherwise
-            // when viewports get panned, they copy dirty pixels
-            DrawAllDirtyBlocks();
-            WindowUpdateAllViewports();
             DrawAllDirtyBlocks();
         }
     }
 
     void DrawAllDirtyBlocks()
     {
+        _drawingContext->CalculcateClipping(_bitsDPI);
+        
         _invalidationGrid.TraverseDirtyCells(
             [this](int32_t x, int32_t y, int32_t columns, int32_t rows) { DrawDirtyBlocks(x, y, columns, rows); });
     }
@@ -396,6 +395,8 @@ public:
     {
         if (dx == 0 && dy == 0)
             return;
+
+        _drawingContext->FlushCommandBuffers();
 
         OpenGLFramebuffer& framebuffer = _drawingContext->GetFinalFramebuffer();
         framebuffer.Bind();
