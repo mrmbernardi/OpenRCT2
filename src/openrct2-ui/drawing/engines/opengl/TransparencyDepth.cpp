@@ -56,7 +56,7 @@ namespace OpenRCT2::Ui
             x_sweep.push_back({ right, false, top, bottom });
         }
 
-        std::sort(x_sweep.begin(), x_sweep.end(), [](const XData& a, const XData& b) -> bool {
+        std::stable_sort(x_sweep.begin(), x_sweep.end(), [](const XData& a, const XData& b) -> bool {
             if (a.xposition != b.xposition)
                 return a.xposition < b.xposition;
 

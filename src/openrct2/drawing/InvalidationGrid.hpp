@@ -42,7 +42,7 @@ namespace OpenRCT2
         void Reset(int32_t width, int32_t height)
         {
             _blockShiftX = 7;
-            _blockShiftY = 5; // Keep column at 32 (1 << 5)
+            _blockShiftY = 7;
             _blockWidth = 1 << _blockShiftX;
             _blockHeight = 1 << _blockShiftY;
             _blockColumns = (width >> _blockShiftX) + 1;
