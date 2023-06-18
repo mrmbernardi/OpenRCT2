@@ -8,8 +8,6 @@ namespace OpenRCT2
 {
     struct InvalidationGrid
     {
-        uint32_t _blockShiftX{};
-        uint32_t _blockShiftY{};
         uint32_t _blockWidth{};
         uint32_t _blockHeight{};
         uint32_t _blockColumns{};
@@ -39,14 +37,14 @@ namespace OpenRCT2
             return _blockHeight;
         }
 
-        void Reset(int32_t width, int32_t height)
+        void Reset(int32_t width, int32_t height, uint32_t blockWidth, uint32_t blockHeight)
         {
-            _blockShiftX = 7;
-            _blockShiftY = 7;
-            _blockWidth = 1 << _blockShiftX;
-            _blockHeight = 1 << _blockShiftY;
-            _blockColumns = (width >> _blockShiftX) + 1;
-            _blockRows = (height >> _blockShiftY) + 1;
+            _blockWidth = blockWidth;
+            _blockHeight = blockHeight;
+
+            _blockColumns = (width / _blockWidth) + 1;
+            _blockRows = (height / _blockHeight) + 1;
+
             _screenWidth = width;
             _screenHeight = height;
 
@@ -66,13 +64,11 @@ namespace OpenRCT2
             if (top >= bottom)
                 return;
 
-            right--;
-            bottom--;
+            left /= _blockWidth;
+            right /= _blockWidth;
 
-            left >>= _blockShiftX;
-            right >>= _blockShiftX;
-            top >>= _blockShiftY;
-            bottom >>= _blockShiftY;
+            top /= _blockHeight;
+            bottom /= _blockHeight;
 
             for (int16_t y = top; y <= bottom; y++)
             {
@@ -107,11 +103,12 @@ namespace OpenRCT2
 
             for (uint32_t x = 0; x < _blockColumns; x++)
             {
-                for (uint32_t y = 0; y < _blockRows; y++)
+                for (uint32_t y = 0; y < _blockRows;)
                 {
                     uint32_t yOffset = y * _blockColumns;
                     if (_blocks[yOffset + x] == 0)
                     {
+                        y++;
                         continue;
                     }
 
