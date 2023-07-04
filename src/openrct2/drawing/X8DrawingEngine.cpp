@@ -178,8 +178,9 @@ void X8DrawingEngine::PaintWindows()
 {
     WindowResetVisibilities();
     WindowUpdateAllViewports();
-    if (gForceRedraw)
+    if (gForceRedraw || _invalidationGrid.ShouldRedrawAll())
     {
+        _invalidationGrid.ClearGrid();
         WindowDrawAll(_bitsDPI, 0, 0, _width, _height);
     }
     else
@@ -312,7 +313,7 @@ void X8DrawingEngine::ConfigureBits(uint32_t width, uint32_t height, uint32_t pi
     dpi->height = height;
     dpi->pitch = _pitch - width;
 
-    _invalidationGrid.Reset(_width, _height, 128, 64);
+    _invalidationGrid.Reset(_width, _height, 64, 64);
 
     if (LightFXIsAvailable())
     {
@@ -327,15 +328,8 @@ void X8DrawingEngine::OnDrawDirtyBlock(
 
 void X8DrawingEngine::DrawAllDirtyBlocks()
 {
-    if (gForceRedraw)
-    {
-        WindowDrawAll(_bitsDPI, 0, 0, _width, _height);
-    }
-    else
-    {
-        _invalidationGrid.TraverseDirtyCells(
-            [this](int32_t x, int32_t y, int32_t columns, int32_t rows) { DrawDirtyBlocks(x, y, columns, rows); });
-    }
+    _invalidationGrid.TraverseDirtyCells(
+        [this](int32_t x, int32_t y, int32_t columns, int32_t rows) { DrawDirtyBlocks(x, y, columns, rows); });
 }
 
 void X8DrawingEngine::DrawDirtyBlocks(uint32_t x, uint32_t y, uint32_t columns, uint32_t rows)

@@ -14,6 +14,7 @@ namespace OpenRCT2
         uint32_t _blockRows{};
         int32_t _screenWidth{};
         int32_t _screenHeight{};
+        size_t _blocksInvalidated{};
         std::vector<uint8_t> _blocks;
 
     public:
@@ -39,6 +40,8 @@ namespace OpenRCT2
 
         void Reset(int32_t width, int32_t height, uint32_t blockWidth, uint32_t blockHeight)
         {
+            _blocksInvalidated = 0;
+
             _blockWidth = blockWidth;
             _blockHeight = blockHeight;
 
@@ -76,64 +79,56 @@ namespace OpenRCT2
                 for (int16_t x = left; x <= right; x++)
                 {
                     _blocks[yOffset + x] = 1;
+                    _blocksInvalidated++;
                 }
             }
         }
 
+        size_t ShouldRedrawAll() const
+        {
+            // Return true when over 80% of the grid is invalidated.
+            return _blocksInvalidated > static_cast<size_t>((_blockColumns * _blockRows) * 0.8);
+        }
+
+        void ClearGrid()
+        {
+            _blocksInvalidated = 0;
+            std::fill(_blocks.begin(), _blocks.end(), 0);
+        }
+
         template<typename F> void TraverseDirtyCells(F&& func)
         {
-            // TODO: For optimal performance it is currently limited to a single column.
-            // The optimal approach would be to extract all dirty regions as rectangles not including
-            // parts that are not marked dirty and have the grid more fine grained.
-            // A situation like following:
-            //
-            //   0 1 2 3 4 5 6 7 8 9
-            //   1 - - - - - - - - -
-            //   2 - x x x x - - - -
-            //   3 - x x - - - - - -
-            //   4 - - - - - - - - -
-            //   5 - - - - - - - - -
-            //   6 - - - - - - - - -
-            //   7 - - - - - - - - -
-            //   8 - - - - - - - - -
-            //   9 - - - - - - - - -
-            //
-            // Would currently redraw {2,2} to {3,5} where {3,4} and {3,5} are not dirty. Choosing to do this
-            // per column eliminates this issue but limits it to rendering just a single column at a time.
-
             for (uint32_t x = 0; x < _blockColumns; x++)
             {
-                for (uint32_t y = 0; y < _blockRows;)
+                for (uint32_t y = 0; y < _blockRows; y++)
                 {
-                    uint32_t yOffset = y * _blockColumns;
+                    const uint32_t yOffset = y * _blockColumns;
                     if (_blocks[yOffset + x] == 0)
                     {
-                        y++;
                         continue;
                     }
 
-                    // See comment above as to why this is 1.
-                    const uint32_t columns = 1;
-
-                    // Check rows
+                    const auto columns = GetNumDirtyColumns(x, yOffset);
                     const auto rows = GetNumDirtyRows(x, y, columns);
 
-                    func(x, y, columns, rows);
-
-                    // Unset dirty rows.
-                    for (uint32_t y2 = y; y2 < y + rows; y2++)
+                    // Clear the invalidated blocks.
+                    for (uint32_t top = y; top < y + rows; top++)
                     {
-                        uint32_t topOffset = y2 * _blockColumns;
-                        _blocks[topOffset + x] = 0;
+                        uint32_t topOffset = top * _blockColumns;
+                        for (uint32_t left = x; left < x + columns; left++)
+                        {
+                            _blocks[topOffset + left] = 0;
+                            _blocksInvalidated--;
+                        }
                     }
 
-                    y += rows;
+                    func(x, y, columns, rows);
                 }
             }
         }
 
     private:
-        uint32_t GetNumDirtyRows(const uint32_t x, const uint32_t y, const uint32_t columns)
+        uint32_t GetNumDirtyRows(const uint32_t x, const uint32_t y, const uint32_t columns) noexcept
         {
             uint32_t yy = y;
             for (yy = y; yy < _blockRows; yy++)
@@ -148,6 +143,19 @@ namespace OpenRCT2
                 }
             }
             return yy - y;
+        }
+
+        uint32_t GetNumDirtyColumns(uint32_t x, const uint32_t yOffset) noexcept
+        {
+            uint32_t xx;
+            for (xx = x; xx < _blockColumns; xx++)
+            {
+                if (_blocks[yOffset + x] == 0)
+                {
+                    break;
+                }
+            }
+            return xx - x;
         }
     };
 

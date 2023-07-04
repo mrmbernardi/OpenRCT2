@@ -6,6 +6,7 @@
  *
  * OpenRCT2 is licensed under the GNU General Public License version 3.
  *****************************************************************************/
+//#pragma optimize("", off)
 
 #ifndef DISABLE_OPENGL
 
@@ -254,7 +255,7 @@ public:
         ConfigureCanvas();
         _drawingContext->Resize(width, height);
 
-        _invalidationGrid.Reset(width, height, 256, 256);
+        _invalidationGrid.Reset(width, height, 64, 64);
     }
 
     void SetPalette(const GamePalette& palette) override
@@ -332,14 +333,26 @@ public:
         Display();
     }
 
+    bool ShouldRedrawAll()
+    {
+        // TODO: Render the rain onto a separate transparent render target and blend it on top of the main framebuffer.
+        // This is currently required as the rain would leave pixels on the screen.
+        if (ClimateIsRaining())
+        {
+            return true;
+        }
+        return gForceRedraw || _invalidationGrid.ShouldRedrawAll();
+    }
+
     void PaintWindows() override
     {
         _drawingContext->CalculcateClipping(_bitsDPI);
 
         WindowResetVisibilities();
         WindowUpdateAllViewports();
-        if (gForceRedraw)
+        if (ShouldRedrawAll())
         {
+            _invalidationGrid.ClearGrid();
             WindowDrawAll(_bitsDPI, 0, 0, _width, _height);
         }
         else

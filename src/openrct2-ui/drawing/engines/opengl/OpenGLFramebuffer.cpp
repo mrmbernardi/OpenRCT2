@@ -15,6 +15,7 @@
 #    include <algorithm>
 #    include <memory>
 #    include <openrct2/common.h>
+#    include <openrct2/core/Guard.hpp>
 
 using namespace OpenRCT2::Ui;
 
@@ -91,7 +92,7 @@ void OpenGLFramebuffer::BindRead() const
 
 void OpenGLFramebuffer::GetPixels(DrawPixelInfo& dpi) const
 {
-    assert(dpi.width == _width && dpi.height == _height);
+    Guard::Assert(dpi.width == _width && dpi.height == _height);
 
     auto pixels = std::make_unique<uint8_t[]>(_width * _height);
     glBindTexture(GL_TEXTURE_2D, _texture);
@@ -114,7 +115,7 @@ void OpenGLFramebuffer::GetPixels(DrawPixelInfo& dpi) const
 
 void OpenGLFramebuffer::SetPixels(const DrawPixelInfo& dpi)
 {
-    assert(dpi.width == _width && dpi.height == _height);
+    Guard::Assert(dpi.width == _width && dpi.height == _height);
 
     auto pixels = std::make_unique<uint8_t[]>(_width * _height);
     // Flip pixels vertically on copy
