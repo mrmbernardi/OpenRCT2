@@ -412,7 +412,6 @@ public:
         _drawingContext->FlushCommandBuffers();
 
         OpenGLFramebuffer& framebuffer = _drawingContext->GetFinalFramebuffer();
-        framebuffer.Bind();
         framebuffer.GetPixels(_bitsDPI);
 
         // Originally 0x00683359
