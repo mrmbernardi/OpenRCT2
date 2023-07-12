@@ -313,7 +313,7 @@ void X8DrawingEngine::ConfigureBits(uint32_t width, uint32_t height, uint32_t pi
     dpi->height = height;
     dpi->pitch = _pitch - width;
 
-    _invalidationGrid.Reset(_width, _height, 64, 64);
+    _invalidationGrid.Reset(_width, _height, 128, 64);
 
     if (LightFXIsAvailable())
     {

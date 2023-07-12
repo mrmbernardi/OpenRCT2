@@ -9,7 +9,7 @@ namespace OpenRCT2
     struct InvalidationGrid
     {
         // Threshold in percent for when to redraw the entire screen.
-        static constexpr uint32_t FullRedrawThreshold = 80;
+        static constexpr uint32_t FullRedrawThreshold = 65;
 
         uint32_t _blockWidth{};
         uint32_t _blockHeight{};
@@ -81,8 +81,11 @@ namespace OpenRCT2
                 uint32_t yOffset = y * _blockColumns;
                 for (int16_t x = left; x <= right; x++)
                 {
-                    _blocks[yOffset + x] = 1;
+                    if (_blocks[yOffset + x] == 1)
+                        continue;
+
                     _blocksInvalidated++;
+                    _blocks[yOffset + x] = 1;
                 }
             }
         }
@@ -90,7 +93,7 @@ namespace OpenRCT2
         bool ShouldRedrawAll() const
         {
             // Return true when the amount of invalidated cells exceeds the threshold.
-            return _blocksInvalidated > ((_blockColumns * _blockRows) * FullRedrawThreshold) / 100;
+            return _blocksInvalidated > (_blocks.size() * FullRedrawThreshold) / 100;
         }
 
         void ClearGrid()

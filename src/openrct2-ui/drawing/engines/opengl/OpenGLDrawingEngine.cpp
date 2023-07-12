@@ -255,7 +255,8 @@ public:
         ConfigureCanvas();
         _drawingContext->Resize(width, height);
 
-        _invalidationGrid.Reset(width, height, 64, 64);
+        // NOTE: Keep the block size relatively big to avoid odd shaking/shivering issues.
+        _invalidationGrid.Reset(width, height, 256, 256);
     }
 
     void SetPalette(const GamePalette& palette) override
@@ -463,7 +464,7 @@ public:
 
     DRAWING_ENGINE_FLAGS GetFlags() override
     {
-        return DEF_DIRTY_OPTIMISATIONS;
+        return DEF_NONE;
     }
 
     void InvalidateImage(uint32_t image) override

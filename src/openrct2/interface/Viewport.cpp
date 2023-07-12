@@ -409,10 +409,12 @@ static void ViewportRedrawAfterShift(DrawPixelInfo& dpi, WindowBase* window, Vie
         auto top = viewport->pos.y;
         auto bottom = viewport->pos.y + viewport->height;
 
+        // TODO: Investigate why OpenGL leaves stray pixels behind when scrolling.
+        const auto engineSupportsViewportShift = GetContext()->GetDrawingEngine()->GetFlags() & DEF_DIRTY_OPTIMISATIONS;
+
         // if moved more than the viewport size
-        if (abs(coords.x) < viewport->width && abs(coords.y) < viewport->height)
+        if (engineSupportsViewportShift && abs(coords.x) < viewport->width && abs(coords.y) < viewport->height)
         {
-            // update whole block ?
             DrawingEngineCopyRect(viewport->pos.x, viewport->pos.y, viewport->width, viewport->height, coords.x, coords.y);
 
             if (coords.x > 0)
@@ -425,7 +427,7 @@ static void ViewportRedrawAfterShift(DrawPixelInfo& dpi, WindowBase* window, Vie
             else if (coords.x < 0)
             {
                 // draw right
-                auto _left = viewport->pos.x + viewport->width + coords.x;
+                auto _left = viewport->pos.x + coords.x;
                 WindowDrawAll(dpi, _left, top, right, bottom);
                 right += coords.x;
             }
@@ -433,14 +435,16 @@ static void ViewportRedrawAfterShift(DrawPixelInfo& dpi, WindowBase* window, Vie
             if (coords.y > 0)
             {
                 // draw top
-                bottom = viewport->pos.y + coords.y;
-                WindowDrawAll(dpi, left, top, right, bottom);
+                auto _bottom = viewport->pos.y + coords.y;
+                WindowDrawAll(dpi, left, top, right, _bottom);
+                top += coords.y;
             }
             else if (coords.y < 0)
             {
                 // draw bottom
-                top = viewport->pos.y + viewport->height + coords.y;
-                WindowDrawAll(dpi, left, top, right, bottom);
+                auto _top = viewport->pos.y + coords.y;
+                WindowDrawAll(dpi, left, _top, right, bottom);
+                bottom += coords.y;
             }
         }
         else
