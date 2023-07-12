@@ -8,13 +8,16 @@ namespace OpenRCT2
 {
     struct InvalidationGrid
     {
+        // Threshold in percent for when to redraw the entire screen.
+        static constexpr uint32_t FullRedrawThreshold = 80;
+
         uint32_t _blockWidth{};
         uint32_t _blockHeight{};
         uint32_t _blockColumns{};
         uint32_t _blockRows{};
         int32_t _screenWidth{};
         int32_t _screenHeight{};
-        size_t _blocksInvalidated{};
+        uint32_t _blocksInvalidated{};
         std::vector<uint8_t> _blocks;
 
     public:
@@ -84,10 +87,10 @@ namespace OpenRCT2
             }
         }
 
-        size_t ShouldRedrawAll() const
+        bool ShouldRedrawAll() const
         {
-            // Return true when over 80% of the grid is invalidated.
-            return _blocksInvalidated > static_cast<size_t>((_blockColumns * _blockRows) * 0.8);
+            // Return true when the amount of invalidated cells exceeds the threshold.
+            return _blocksInvalidated > ((_blockColumns * _blockRows) * FullRedrawThreshold) / 100;
         }
 
         void ClearGrid()
@@ -102,60 +105,48 @@ namespace OpenRCT2
             {
                 for (uint32_t y = 0; y < _blockRows; y++)
                 {
-                    const uint32_t yOffset = y * _blockColumns;
-                    if (_blocks[yOffset + x] == 0)
+                    if (_blocks[y * _blockColumns + x])
                     {
-                        continue;
+                        const auto cols = GetNumDirtyColumns(x, y);
+                        const auto rows = GetNumDirtyRows(x, y);
+
+                        // Draw the region.
+                        func(x, y, cols, rows);
+
+                        // Unset rows and cols
+                        ClearRegion(x, y, cols, rows);
                     }
-
-                    const auto columns = GetNumDirtyColumns(x, yOffset);
-                    const auto rows = GetNumDirtyRows(x, y, columns);
-
-                    // Clear the invalidated blocks.
-                    for (uint32_t top = y; top < y + rows; top++)
-                    {
-                        uint32_t topOffset = top * _blockColumns;
-                        for (uint32_t left = x; left < x + columns; left++)
-                        {
-                            _blocks[topOffset + left] = 0;
-                            _blocksInvalidated--;
-                        }
-                    }
-
-                    func(x, y, columns, rows);
                 }
             }
+            _blocksInvalidated = 0;
         }
 
     private:
-        uint32_t GetNumDirtyRows(const uint32_t x, const uint32_t y, const uint32_t columns) noexcept
+        uint32_t GetNumDirtyRows(const uint32_t x, const uint32_t y) noexcept
         {
-            uint32_t yy = y;
-            for (yy = y; yy < _blockRows; yy++)
-            {
-                uint32_t yyOffset = yy * _blockColumns;
-                for (uint32_t xx = x; xx < x + columns; xx++)
-                {
-                    if (_blocks[yyOffset + xx] == 0)
-                    {
-                        return yy - y;
-                    }
-                }
-            }
-            return yy - y;
+            uint32_t y2 = y;
+            while (y2 < _blockRows && _blocks[y2 * _blockColumns + x])
+                y2++;
+            return y2 - y;
         }
 
-        uint32_t GetNumDirtyColumns(uint32_t x, const uint32_t yOffset) noexcept
+        uint32_t GetNumDirtyColumns(const uint32_t x, const uint32_t y) noexcept
         {
-            uint32_t xx;
-            for (xx = x; xx < _blockColumns; xx++)
+            uint32_t x2 = x;
+            while (x2 < _blockColumns && _blocks[y * _blockColumns + x2])
+                x2++;
+            return x2 - x;
+        }
+
+        void ClearRegion(uint32_t x, uint32_t y, uint32_t cols, uint32_t rows) noexcept
+        {
+            for (uint32_t x2 = x; x2 < x + cols; x2++)
             {
-                if (_blocks[yOffset + x] == 0)
+                for (uint32_t y2 = y; y2 < y + rows; y2++)
                 {
-                    break;
+                    _blocks[y2 * _blockColumns + x2] = false;
                 }
             }
-            return xx - x;
         }
     };
 
