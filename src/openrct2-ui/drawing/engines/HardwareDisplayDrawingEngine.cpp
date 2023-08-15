@@ -193,16 +193,14 @@ public:
     }
 
 protected:
-    void OnDrawDirtyBlock(uint32_t left, uint32_t top, uint32_t columns, uint32_t rows) override
+    void OnDrawDirtyBlock(int32_t left, int32_t top, int32_t right, int32_t bottom) override
     {
         if (gShowDirtyVisuals)
         {
             const auto decayTime = ClockType::now() + std::chrono::milliseconds(DIRTY_VISUAL_TIME);
-            const auto right = left + columns;
-            const auto bottom = top + rows;
-            for (uint32_t x = left; x < right; x++)
+            for (int32_t x = left; x < right; x++)
             {
-                for (uint32_t y = top; y < bottom; y++)
+                for (int32_t y = top; y < bottom; y++)
                 {
                     SetDirtyVisualTime(x, y, decayTime);
                 }
@@ -324,9 +322,12 @@ private:
         return result;
     }
 
-    void SetDirtyVisualTime(uint32_t x, uint32_t y, ClockType::time_point value)
+    void SetDirtyVisualTime(int32_t x, int32_t y, ClockType::time_point value)
     {
-        uint32_t i = y * _invalidationGrid.GetColumns() + x;
+        const auto blockWidth = _invalidationGrid.GetBlockWidth();
+        const auto blockHeight = _invalidationGrid.GetBlockHeight();
+
+        size_t i = (y / blockHeight) * _invalidationGrid.GetColumns() + (x / blockWidth);
         if (_dirtyVisualsTime.size() > i)
         {
             _dirtyVisualsTime[i] = value;

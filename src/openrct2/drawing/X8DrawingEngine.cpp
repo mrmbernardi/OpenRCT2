@@ -321,34 +321,19 @@ void X8DrawingEngine::ConfigureBits(uint32_t width, uint32_t height, uint32_t pi
     }
 }
 
-void X8DrawingEngine::OnDrawDirtyBlock(
-    [[maybe_unused]] uint32_t x, [[maybe_unused]] uint32_t y, [[maybe_unused]] uint32_t columns, [[maybe_unused]] uint32_t rows)
+void X8DrawingEngine::OnDrawDirtyBlock(int32_t, int32_t, int32_t, int32_t)
 {
 }
 
 void X8DrawingEngine::DrawAllDirtyBlocks()
 {
     _invalidationGrid.TraverseDirtyCells(
-        [this](int32_t x, int32_t y, int32_t columns, int32_t rows) { DrawDirtyBlocks(x, y, columns, rows); });
+        [this](int32_t left, int32_t top, int32_t right, int32_t bottom) { DrawDirtyBlocks(left, top, right, bottom); });
 }
 
-void X8DrawingEngine::DrawDirtyBlocks(uint32_t x, uint32_t y, uint32_t columns, uint32_t rows)
+void X8DrawingEngine::DrawDirtyBlocks(int32_t left, int32_t top, int32_t right, int32_t bottom)
 {
-    const auto blockWidth = _invalidationGrid.GetBlockWidth();
-    const auto blockHeight = _invalidationGrid.GetBlockHeight();
-
-    // Determine region in pixels
-    uint32_t left = std::max<uint32_t>(0, x * blockWidth);
-    uint32_t top = std::max<uint32_t>(0, y * blockHeight);
-    uint32_t right = std::min(_width, left + (columns * blockWidth));
-    uint32_t bottom = std::min(_height, top + (rows * blockHeight));
-    if (right <= left || bottom <= top)
-    {
-        return;
-    }
-
-    // Draw region
-    OnDrawDirtyBlock(x, y, columns, rows);
+    OnDrawDirtyBlock(left, top, right, bottom);
     WindowDrawAll(_bitsDPI, left, top, right, bottom);
 }
 

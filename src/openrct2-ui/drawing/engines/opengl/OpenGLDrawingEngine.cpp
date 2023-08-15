@@ -365,26 +365,14 @@ public:
     void DrawAllDirtyBlocks()
     {
         _drawingContext->CalculcateClipping(_bitsDPI);
-        
-        _invalidationGrid.TraverseDirtyCells(
-            [this](int32_t x, int32_t y, int32_t columns, int32_t rows) { DrawDirtyBlocks(x, y, columns, rows); });
+
+        _invalidationGrid.TraverseDirtyCells([this](uint32_t left, uint32_t top, uint32_t right, uint32_t bottom) {
+            DrawDirtyBlocks(left, top, right, bottom);
+        });
     }
 
-    void DrawDirtyBlocks(uint32_t x, uint32_t y, uint32_t columns, uint32_t rows)
+    void DrawDirtyBlocks(uint32_t left, uint32_t top, uint32_t right, uint32_t bottom)
     {
-        const auto blockWidth = _invalidationGrid.GetBlockWidth();
-        const auto blockHeight = _invalidationGrid.GetBlockHeight();
-
-        // Determine region in pixels
-        uint32_t left = std::max<uint32_t>(0, x * blockWidth);
-        uint32_t top = std::max<uint32_t>(0, y * blockHeight);
-        uint32_t right = std::min(_width, left + (columns * blockWidth));
-        uint32_t bottom = std::min(_height, top + (rows * blockHeight));
-        if (right <= left || bottom <= top)
-        {
-            return;
-        }
-
         // Draw region
         WindowDrawAll(_bitsDPI, left, top, right, bottom);
     }

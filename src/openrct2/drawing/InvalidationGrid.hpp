@@ -15,8 +15,8 @@ namespace OpenRCT2
         uint32_t _blockHeight{};
         uint32_t _blockColumns{};
         uint32_t _blockRows{};
-        int32_t _screenWidth{};
-        int32_t _screenHeight{};
+        uint32_t _screenWidth{};
+        uint32_t _screenHeight{};
         uint32_t _blocksInvalidated{};
         std::vector<uint8_t> _blocks;
 
@@ -104,52 +104,65 @@ namespace OpenRCT2
 
         template<typename F> void TraverseDirtyCells(F&& func)
         {
-            for (uint32_t x = 0; x < _blockColumns; x++)
+            const auto columnCount = _blockColumns;
+            const auto rowCount = _blockRows;
+            const auto blockWidth = _blockWidth;
+            const auto blockHeight = _blockHeight;
+
+            for (uint32_t column = 0; column < columnCount; column++)
             {
-                for (uint32_t y = 0; y < _blockRows; y++)
+                uint32_t index = 0;
+                for (uint32_t row = 0; row < rowCount; row++)
                 {
-                    if (_blocks[y * _blockColumns + x])
+                    if (_blocks[index + column] != 0)
                     {
-                        const auto cols = GetNumDirtyColumns(x, y);
-                        const auto rows = GetNumDirtyRows(x, y);
+                        uint32_t columnStart = column;
+                        uint32_t rowStart = row;
+                        uint32_t index2 = index;
 
-                        // Draw the region.
-                        func(x, y, cols, rows);
+                        while (true)
+                        {
+                            rowStart++;
+                            index2 += columnCount;
+                            if (rowStart >= rowCount || _blocks[index2 + columnStart] == 0)
+                                break;
+                        }
 
-                        // Unset rows and cols
-                        ClearRegion(x, y, cols, rows);
+                        rowStart--;
+                        index2 -= columnCount;
+
+                        clearBlocks(index, column, columnStart, index2);
+
+                        const auto left = column * blockWidth;
+                        const auto top = row * blockHeight;
+                        const auto right = (columnStart + 1) * blockWidth;
+                        const auto bottom = (rowStart + 1) * blockHeight;
+
+                        if (right < _screenWidth && bottom < _screenWidth)
+                        {
+                            func(left, top, std::min<int32_t>(right, _screenWidth), std::min<int32_t>(bottom, _screenHeight));
+                        }
                     }
+                    index += columnCount;
                 }
             }
-            _blocksInvalidated = 0;
         }
 
     private:
-        uint32_t GetNumDirtyRows(const uint32_t x, const uint32_t y) noexcept
+        void clearBlocks(uint32_t index, uint32_t column, uint32_t columnStart, uint32_t index2) noexcept
         {
-            uint32_t y2 = y;
-            while (y2 < _blockRows && _blocks[y2 * _blockColumns + x])
-                y2++;
-            return y2 - y;
-        }
-
-        uint32_t GetNumDirtyColumns(const uint32_t x, const uint32_t y) noexcept
-        {
-            uint32_t x2 = x;
-            while (x2 < _blockColumns && _blocks[y * _blockColumns + x2])
-                x2++;
-            return x2 - x;
-        }
-
-        void ClearRegion(uint32_t x, uint32_t y, uint32_t cols, uint32_t rows) noexcept
-        {
-            for (uint32_t x2 = x; x2 < x + cols; x2++)
+            const auto columnCount = _blockColumns;
+            do
             {
-                for (uint32_t y2 = y; y2 < y + rows; y2++)
+                uint32_t tempColumn = column;
+                do
                 {
-                    _blocks[y2 * _blockColumns + x2] = false;
-                }
-            }
+                    _blocks[index + tempColumn] = 0;
+                    tempColumn++;
+                } while (tempColumn <= columnStart);
+
+                index += columnCount;
+            } while (index <= index2);
         }
     };
 

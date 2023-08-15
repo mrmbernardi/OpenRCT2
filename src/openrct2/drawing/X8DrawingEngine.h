@@ -106,11 +106,11 @@ namespace OpenRCT2
 
         protected:
             void ConfigureBits(uint32_t width, uint32_t height, uint32_t pitch);
-            virtual void OnDrawDirtyBlock(uint32_t x, uint32_t y, uint32_t columns, uint32_t rows);
+            virtual void OnDrawDirtyBlock(int32_t left, int32_t top, int32_t right, int32_t bottom);
 
         private:
             void DrawAllDirtyBlocks();
-            void DrawDirtyBlocks(uint32_t x, uint32_t y, uint32_t columns, uint32_t rows);
+            void DrawDirtyBlocks(int32_t left, int32_t top, int32_t right, int32_t bottom);
         };
 #ifdef __WARN_SUGGEST_FINAL_TYPES__
 #    pragma GCC diagnostic pop
