@@ -600,34 +600,14 @@ static void TTFDrawStringRawTTF(DrawPixelInfo& dpi, std::string_view text, TextD
         {
             for (int32_t xx = 0; xx < width - 0; xx++)
             {
-                if (*src != 0)
+                if (surface->GetPixel(xx + 1, yy) || surface->GetPixel(xx - 1, yy)
+                    || surface->GetPixel(xx, yy + 1) || surface->GetPixel(xx, yy - 1))
                 {
-                    // right
-                    if (xx + skipX < dpi.width + dpi.pitch - 1)
-                    {
-                        *(dst + 1) = info->palette[3];
-                    }
-                    // left
-                    if (xx + skipX > 1)
-                    {
-                        *(dst - 1) = info->palette[3];
-                    }
-                    // top
-                    if (yy + skipY > 1)
-                    {
-                        *(dst - width - dstScanSkip) = info->palette[3];
-                    }
-                    // bottom
-                    if (yy + skipY < dpi.height - 1)
-                    {
-                        *(dst + width + dstScanSkip) = info->palette[3];
-                    }
+                    *(dst) = info->palette[3];
                 }
-                src++;
                 dst++;
             }
             // Skip any remaining bits
-            src += srcScanSkip;
             dst += dstScanSkip;
         }
     }
@@ -640,7 +620,7 @@ static void TTFDrawStringRawTTF(DrawPixelInfo& dpi, std::string_view text, TextD
         {
             if (*src != 0)
             {
-                if (info->flags & TEXT_DRAW_FLAG_INSET)
+                if (info->flags & TEXT_DRAW_FLAG_INSET && xx + skipX < dpi.width - 1 && yy + skipY < dpi.height - 1)
                 {
                     *(dst + width + dstScanSkip + 1) = info->palette[3];
                 }
