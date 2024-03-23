@@ -452,7 +452,7 @@ public:
 
     DRAWING_ENGINE_FLAGS GetFlags() override
     {
-        return DEF_NONE;
+        return DEF_DIRTY_OPTIMISATIONS;
     }
 
     void InvalidateImage(uint32_t image) override
