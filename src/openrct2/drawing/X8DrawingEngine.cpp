@@ -717,7 +717,7 @@ void X8DrawingContext::DrawLine(DrawPixelInfo& dpi, uint32_t colour, const Scree
     GfxDrawLineSoftware(dpi, line, colour);
 }
 
-void X8DrawingContext::DrawSprite(DrawPixelInfo& dpi, const ImageId imageId, int32_t x, int32_t y)
+void X8DrawingContext::DrawSprite(DrawPixelInfo& dpi, const ImageId imageId, int32_t x, int32_t y, int depth)
 {
     GfxDrawSpriteSoftware(dpi, imageId, { x, y });
 }

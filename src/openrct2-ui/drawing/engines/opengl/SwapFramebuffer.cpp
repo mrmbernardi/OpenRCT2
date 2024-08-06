@@ -15,7 +15,7 @@
 
 using namespace OpenRCT2::Ui;
 
-constexpr GLfloat depthValue[1] = { 1.0f };
+//constexpr GLfloat depthValue[1] = { 1.0f };
 constexpr GLfloat depthValueTransparent[1] = { 0.0f };
 constexpr GLuint indexValue[4] = { 0, 0, 0, 0 };
 
@@ -59,7 +59,8 @@ void SwapFramebuffer::ApplyTransparency(ApplyTransparencyShader& shader, GLuint 
 void SwapFramebuffer::Clear()
 {
     _opaqueFramebuffer.Bind();
-    glClearBufferfv(GL_DEPTH, 0, depthValue);
+    const int32_t startingDepth = std::numeric_limits<int32_t>::min();
+    glClearBufferiv(GL_DEPTH, 0, &startingDepth);
 }
 
 #endif /* DISABLE_OPENGL */

@@ -114,7 +114,7 @@ public:
     void FilterRect(
         DrawPixelInfo& dpi, FilterPaletteID palette, int32_t left, int32_t top, int32_t right, int32_t bottom) override;
     void DrawLine(DrawPixelInfo& dpi, uint32_t colour, const ScreenLine& line) override;
-    void DrawSprite(DrawPixelInfo& dpi, const ImageId imageId, int32_t x, int32_t y) override;
+    void DrawSprite(DrawPixelInfo& dpi, const ImageId imageId, int32_t x, int32_t y, int depth = 0) override;
     void DrawSpriteRawMasked(
         DrawPixelInfo& dpi, int32_t x, int32_t y, const ImageId maskImage, const ImageId colourImage) override;
     void DrawSpriteSolid(DrawPixelInfo& dpi, const ImageId image, int32_t x, int32_t y, uint8_t colour) override;
@@ -689,7 +689,7 @@ void OpenGLDrawingContext::DrawLine(DrawPixelInfo& dpi, uint32_t colour, const S
     command.depth = _drawCount++;
 }
 
-void OpenGLDrawingContext::DrawSprite(DrawPixelInfo& dpi, const ImageId imageId, int32_t x, int32_t y)
+void OpenGLDrawingContext::DrawSprite(DrawPixelInfo& dpi, const ImageId imageId, int32_t x, int32_t y, int depth)
 {
     CalculcateClipping(dpi);
 
@@ -820,7 +820,7 @@ void OpenGLDrawingContext::DrawSprite(DrawPixelInfo& dpi, const ImageId imageId,
         command.colour = palettes.x - (special ? 1 : 0);
         command.bounds = { left, top, right, bottom };
         command.flags = special ? 0 : DrawRectCommand::FLAG_NO_TEXTURE | DrawRectCommand::FLAG_MASK;
-        command.depth = _drawCount++;
+        command.depth = depth;
     }
     else
     {
@@ -835,7 +835,7 @@ void OpenGLDrawingContext::DrawSprite(DrawPixelInfo& dpi, const ImageId imageId,
         command.colour = 0;
         command.bounds = { left, top, right, bottom };
         command.flags = paletteCount;
-        command.depth = _drawCount++;
+        command.depth = depth;
     }
 }
 
@@ -1102,7 +1102,7 @@ void OpenGLDrawingContext::DrawTTFBitmap(
 void OpenGLDrawingContext::FlushCommandBuffers()
 {
     glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
+    glDepthFunc(GL_GEQUAL);
 
     _swapFramebuffer->BindOpaque();
     _drawRectShader->Use();

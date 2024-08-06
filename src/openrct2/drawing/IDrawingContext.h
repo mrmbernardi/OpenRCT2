@@ -27,7 +27,7 @@ namespace OpenRCT2::Drawing
             DrawPixelInfo& dpi, FilterPaletteID palette, int32_t left, int32_t top, int32_t right, int32_t bottom)
             = 0;
         virtual void DrawLine(DrawPixelInfo& dpi, uint32_t colour, const ScreenLine& line) = 0;
-        virtual void DrawSprite(DrawPixelInfo& dpi, const ImageId image, int32_t x, int32_t y) = 0;
+        virtual void DrawSprite(DrawPixelInfo& dpi, const ImageId image, int32_t x, int32_t y, int depth) = 0;
         virtual void DrawSpriteRawMasked(
             DrawPixelInfo& dpi, int32_t x, int32_t y, const ImageId maskImage, const ImageId colourImage)
             = 0;

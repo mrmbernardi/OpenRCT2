@@ -385,6 +385,7 @@ template<uint8_t TRotation> static void PaintStructsSortQuadrant(PaintStruct* pa
 {
     // Mark visited.
     child->SortFlags &= ~PaintSortFlags::PendingVisit;
+    return;
 
     // Compare all the children below the first child and move them up in the list if they intersect.
     const PaintStructBoundBox& initialBBox = child->Bounds;
@@ -542,7 +543,8 @@ static void PaintDrawStruct(PaintSession& session, PaintStruct* ps)
     }
     else
     {
-        GfxDrawSprite(session.DPI, imageId, screenPos);
+        auto depth = ps->Bounds.x_end + ps->Bounds.y_end + ps->Bounds.z_end;
+        GfxDrawSprite(session.DPI, imageId, screenPos, depth);
     }
 
     if (ps->Children != nullptr)

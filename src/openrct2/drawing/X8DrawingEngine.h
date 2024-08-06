@@ -140,7 +140,7 @@ namespace OpenRCT2
             void FilterRect(
                 DrawPixelInfo& dpi, FilterPaletteID palette, int32_t left, int32_t top, int32_t right, int32_t bottom) override;
             void DrawLine(DrawPixelInfo& dpi, uint32_t colour, const ScreenLine& line) override;
-            void DrawSprite(DrawPixelInfo& dpi, const ImageId imageId, int32_t x, int32_t y) override;
+            void DrawSprite(DrawPixelInfo& dpi, const ImageId imageId, int32_t x, int32_t y, int depth) override;
             void DrawSpriteRawMasked(
                 DrawPixelInfo& dpi, int32_t x, int32_t y, const ImageId maskImage, const ImageId colourImage) override;
             void DrawSpriteSolid(DrawPixelInfo& dpi, const ImageId image, int32_t x, int32_t y, uint8_t colour) override;
