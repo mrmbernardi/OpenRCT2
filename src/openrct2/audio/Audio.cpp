@@ -162,7 +162,7 @@ namespace OpenRCT2::Audio
         {
             if (viewport->flags & VIEWPORT_FLAG_SOUND_ON)
             {
-                int16_t vx = pos2.x - viewport->viewPos.x;
+                int16_t vx = pos2.x - viewport->ViewPosWorldX();
                 params.pan = viewport->pos.x + viewport->zoom.ApplyInversedTo(vx);
 
                 auto sampleModifier = obj->GetSampleModifier(sampleIndex);

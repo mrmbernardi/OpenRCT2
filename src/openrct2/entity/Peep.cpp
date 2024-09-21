@@ -1311,13 +1311,13 @@ void PeepUpdateCrowdNoise()
     {
         if (peep->x == kLocationNull)
             continue;
-        if (viewport->viewPos.x > peep->SpriteData.SpriteRect.GetRight())
+        if (viewport->ViewPosWorldX() > peep->SpriteData.SpriteRect.GetRight())
             continue;
-        if (viewport->viewPos.x + viewport->ViewWidth() < peep->SpriteData.SpriteRect.GetLeft())
+        if (viewport->ViewPosWorldX() + viewport->ViewWidth() < peep->SpriteData.SpriteRect.GetLeft())
             continue;
-        if (viewport->viewPos.y > peep->SpriteData.SpriteRect.GetBottom())
+        if (viewport->ViewPosWorldY() > peep->SpriteData.SpriteRect.GetBottom())
             continue;
-        if (viewport->viewPos.y + viewport->ViewHeight() < peep->SpriteData.SpriteRect.GetTop())
+        if (viewport->ViewPosWorldY() + viewport->ViewHeight() < peep->SpriteData.SpriteRect.GetTop())
             continue;
 
         visiblePeeps += peep->State == PeepState::Queuing ? 1 : 2;

@@ -725,8 +725,8 @@ namespace OpenRCT2::Ui::Windows
 
             // calculate centre view point of viewport and transform it to minimap coordinates
 
-            cx = ((mainWindow->viewport->ViewWidth() / 2) + mainWindow->viewport->viewPos.x) / kCoordsXYStep;
-            dx = ((mainWindow->viewport->ViewHeight() / 2) + mainWindow->viewport->viewPos.y) / kCoordsXYHalfTile;
+            cx = ((mainWindow->viewport->ViewWidth() / 2) + mainWindow->viewport->ViewPosWorldX()) / kCoordsXYStep;
+            dx = ((mainWindow->viewport->ViewHeight() / 2) + mainWindow->viewport->ViewPosWorldY()) / kCoordsXYHalfTile;
             cx += offset.x * getPracticalMapSize();
             dx += offset.y * getPracticalMapSize();
 
@@ -1043,7 +1043,7 @@ namespace OpenRCT2::Ui::Windows
             mapOffset.y *= getPracticalMapSize();
 
             auto leftTop = widgetOffset + mapOffset
-                + ScreenCoordsXY{ (mainViewport->viewPos.x / kCoordsXYStep), (mainViewport->viewPos.y / kCoordsXYHalfTile) };
+                + ScreenCoordsXY{ (mainViewport->ViewPosWorldX() / kCoordsXYStep), (mainViewport->ViewPosWorldY() / kCoordsXYHalfTile) };
             auto rightBottom = leftTop
                 + ScreenCoordsXY{ mainViewport->ViewWidth() / kCoordsXYStep, mainViewport->ViewHeight() / kCoordsXYHalfTile };
             auto rightTop = ScreenCoordsXY{ rightBottom.x, leftTop.y };

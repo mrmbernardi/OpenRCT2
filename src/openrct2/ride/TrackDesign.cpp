@@ -2130,7 +2130,7 @@ void TrackDesignDrawPreview(TrackDesign& td, uint8_t* pixels)
     const ScreenCoordsXY offset = { size_x / 2, size_y / 2 };
     for (uint8_t i = 0; i < 4; i++)
     {
-        view.viewPos = Translate3DTo2DWithZ(i, centre) - offset;
+        view.SetViewPosFromWorld(Translate3DTo2DWithZ(i, centre) - offset);
         view.rotation = i;
         ViewportRender(dpi, &view);
 

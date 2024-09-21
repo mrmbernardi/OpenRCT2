@@ -437,8 +437,8 @@ void LightFXUpdateViewportSettings()
     if (mainWindow != nullptr)
     {
         Viewport* viewport = WindowGetViewport(mainWindow);
-        _current_view_x_back = viewport->viewPos.x;
-        _current_view_y_back = viewport->viewPos.y;
+        _current_view_x_back = viewport->ViewPosWorldX();
+        _current_view_y_back = viewport->ViewPosWorldY();
         _current_view_rotation_back = viewport->rotation;
         _current_view_zoom_back = viewport->zoom;
     }

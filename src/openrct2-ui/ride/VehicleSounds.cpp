@@ -116,8 +116,8 @@ namespace OpenRCT2::Audio
         const auto quarter_w = g_music_tracking_viewport->ViewWidth() / 4;
         const auto quarter_h = g_music_tracking_viewport->ViewHeight() / 4;
 
-        auto left = g_music_tracking_viewport->viewPos.x;
-        auto bottom = g_music_tracking_viewport->viewPos.y;
+        auto left = g_music_tracking_viewport->ViewPosWorldX();
+        auto bottom = g_music_tracking_viewport->ViewPosWorldY();
 
         if (Ui::Windows::WindowGetClassification(*gWindowAudioExclusive) == WindowClass::MainWindow)
         {
@@ -168,7 +168,7 @@ namespace OpenRCT2::Audio
         VehicleSoundParams param;
         param.priority = priority;
         int32_t panX = (vehicle.SpriteData.SpriteRect.GetLeft() / 2) + (vehicle.SpriteData.SpriteRect.GetRight() / 2)
-            - g_music_tracking_viewport->viewPos.x;
+            - g_music_tracking_viewport->ViewPosWorldX();
         panX = g_music_tracking_viewport->zoom.ApplyInversedTo(panX);
         panX += g_music_tracking_viewport->pos.x;
 
@@ -180,7 +180,7 @@ namespace OpenRCT2::Audio
         param.pan_x = ((((panX * 65536) / screenWidth) - 0x8000) >> 4);
 
         int32_t panY = (vehicle.SpriteData.SpriteRect.GetTop() / 2) + (vehicle.SpriteData.SpriteRect.GetBottom() / 2)
-            - g_music_tracking_viewport->viewPos.y;
+            - g_music_tracking_viewport->ViewPosWorldY();
         panY = g_music_tracking_viewport->zoom.ApplyInversedTo(panY);
         panY += g_music_tracking_viewport->pos.y;
 

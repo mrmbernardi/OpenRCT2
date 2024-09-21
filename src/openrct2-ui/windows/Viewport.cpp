@@ -91,8 +91,8 @@ namespace OpenRCT2::Ui::Windows
             if (mainWindow != nullptr)
             {
                 Viewport* mainViewport = mainWindow->viewport;
-                int32_t x = mainViewport->viewPos.x + (mainViewport->ViewWidth() / 2);
-                int32_t y = mainViewport->viewPos.y + (mainViewport->ViewHeight() / 2);
+                int32_t x = mainViewport->ViewPosWorldX() + (mainViewport->ViewWidth() / 2);
+                int32_t y = mainViewport->ViewPosWorldY() + (mainViewport->ViewHeight() / 2);
                 savedViewPos = { x - (viewport->ViewWidth() / 2), y - (viewport->ViewHeight() / 2) };
             }
 

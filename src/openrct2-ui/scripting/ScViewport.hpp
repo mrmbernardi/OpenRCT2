@@ -41,7 +41,7 @@ namespace OpenRCT2::Scripting
             auto viewport = GetViewport();
             if (viewport != nullptr)
             {
-                return viewport->viewPos.x;
+                return viewport->ViewPosWorldX();
             }
             return 0;
         }
@@ -50,7 +50,7 @@ namespace OpenRCT2::Scripting
             auto viewport = GetViewport();
             if (viewport != nullptr)
             {
-                SetViewLeftTop(value, viewport->viewPos.y);
+                SetViewLeftTop(value, viewport->ViewPosWorldY());
             }
         }
 
@@ -59,7 +59,7 @@ namespace OpenRCT2::Scripting
             auto viewport = GetViewport();
             if (viewport != nullptr)
             {
-                return viewport->viewPos.y;
+                return viewport->ViewPosWorldY();
             }
             return 0;
         }
@@ -68,7 +68,7 @@ namespace OpenRCT2::Scripting
             auto viewport = GetViewport();
             if (viewport != nullptr)
             {
-                SetViewLeftTop(viewport->viewPos.x, value);
+                SetViewLeftTop(viewport->ViewPosWorldX(), value);
             }
         }
 
@@ -77,7 +77,7 @@ namespace OpenRCT2::Scripting
             auto viewport = GetViewport();
             if (viewport != nullptr)
             {
-                return viewport->viewPos.x + viewport->ViewWidth();
+                return viewport->ViewPosWorldX() + viewport->ViewWidth();
             }
             return 0;
         }
@@ -86,7 +86,7 @@ namespace OpenRCT2::Scripting
             auto viewport = GetViewport();
             if (viewport != nullptr)
             {
-                SetViewLeftTop(value - viewport->ViewWidth(), viewport->viewPos.y);
+                SetViewLeftTop(value - viewport->ViewWidth(), viewport->ViewPosWorldY());
             }
         }
 
@@ -95,7 +95,7 @@ namespace OpenRCT2::Scripting
             auto viewport = GetViewport();
             if (viewport != nullptr)
             {
-                return viewport->viewPos.y + viewport->ViewHeight();
+                return viewport->ViewPosWorldY() + viewport->ViewHeight();
             }
             return 0;
         }
@@ -104,7 +104,7 @@ namespace OpenRCT2::Scripting
             auto viewport = GetViewport();
             if (viewport != nullptr)
             {
-                SetViewLeftTop(viewport->viewPos.x, value - viewport->ViewHeight());
+                SetViewLeftTop(viewport->ViewPosWorldX(), value - viewport->ViewHeight());
             }
         }
 
@@ -182,7 +182,8 @@ namespace OpenRCT2::Scripting
             auto viewport = GetViewport();
             if (viewport != nullptr)
             {
-                auto centre = viewport->viewPos + ScreenCoordsXY{ viewport->ViewWidth() / 2, viewport->ViewHeight() / 2 };
+                auto centre = viewport->ViewPosWorld()
+                    + ScreenCoordsXY{ viewport->ViewWidth() / 2, viewport->ViewHeight() / 2 };
                 auto coords = ViewportPosToMapPos(centre, 24, viewport->rotation);
 
                 auto ctx = GetContext()->GetScriptEngine().GetContext();
@@ -272,11 +273,9 @@ namespace OpenRCT2::Scripting
                 auto viewport = w->viewport;
                 if (viewport != nullptr)
                 {
-                    viewport->viewPos.x = left;
-                    viewport->viewPos.y = top;
+                    viewport->SetViewPosFromWorld({left,top});
                     viewport->flags &= ~WF_SCROLLING_TO_LOCATION;
-                    w->savedViewPos.x = viewport->viewPos.x;
-                    w->savedViewPos.y = viewport->viewPos.y;
+                    w->savedViewPos = viewport->ViewPosWorld();
                     viewport->Invalidate();
                 }
             }

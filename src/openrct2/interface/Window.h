@@ -154,7 +154,11 @@ struct Viewport
     int32_t width{};
     int32_t height{};
     ScreenCoordsXY pos{};
+
+private:
     ScreenCoordsXY viewPos{};
+
+public:
     uint32_t flags{};
     ZoomLevel zoom{};
     uint8_t rotation{};
@@ -168,6 +172,41 @@ struct Viewport
     [[nodiscard]] constexpr int32_t ViewHeight() const
     {
         return zoom.ApplyTo(height);
+    }
+
+    [[nodiscard]] constexpr ScreenCoordsXY ViewPosWorld() const
+    {
+        return { zoom.ApplyTo(viewPos.x), zoom.ApplyTo(viewPos.y) };
+    }
+
+    [[nodiscard]] constexpr int32_t ViewPosWorldX() const
+    {
+        return zoom.ApplyTo(viewPos.x);
+    }
+
+    [[nodiscard]] constexpr int32_t ViewPosWorldY() const
+    {
+        return zoom.ApplyTo(viewPos.y);
+    }
+
+    [[nodiscard]] constexpr ScreenCoordsXY& ViewPos()
+    {
+        return viewPos;
+    }
+
+    [[nodiscard]] constexpr int32_t ViewPosX() const
+    {
+        return viewPos.x;
+    }
+    [[nodiscard]] constexpr int32_t ViewPosY() const
+    {
+        return viewPos.y;
+    }
+
+    void SetViewPosFromWorld(ScreenCoordsXY worldCoords)
+    {
+        viewPos.x = zoom.ApplyInversedTo(worldCoords.x);
+        viewPos.y = zoom.ApplyInversedTo(worldCoords.y);
     }
 
     // Use this function on coordinates that are relative to the viewport zoom i.e. a peeps x, y position after transforming

@@ -261,9 +261,9 @@ void InGameConsole::Update()
             Viewport* mainViewport = WindowGetViewport(mainWindow);
             if (mainViewport != nullptr)
             {
-                if (_lastMainViewport != mainViewport->viewPos)
+                if (_lastMainViewport != mainViewport->ViewPosWorld())
                 {
-                    _lastMainViewport = mainViewport->viewPos;
+                    _lastMainViewport = mainViewport->ViewPosWorld();
 
                     GfxInvalidateScreen();
                 }

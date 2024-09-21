@@ -387,8 +387,8 @@ namespace OpenRCT2::RideAudio
             auto viewport = g_music_tracking_viewport;
             auto viewWidth = viewport->ViewWidth();
             auto viewWidth2 = viewWidth * 2;
-            auto viewX = viewport->viewPos.x - viewWidth2;
-            auto viewY = viewport->viewPos.y - viewWidth;
+            auto viewX = viewport->ViewPosWorldX() - viewWidth2;
+            auto viewY = viewport->ViewPosWorldY() - viewWidth;
             auto viewX2 = viewWidth2 + viewWidth2 + viewport->ViewWidth() + viewX;
             auto viewY2 = viewWidth + viewWidth + viewport->ViewHeight() + viewY;
             if (viewX >= rotatedCoords.x || viewY >= rotatedCoords.y || viewX2 < rotatedCoords.x || viewY2 < rotatedCoords.y)
@@ -397,11 +397,13 @@ namespace OpenRCT2::RideAudio
             }
             else
             {
-                auto x2 = (viewport->pos.x + viewport->zoom.ApplyInversedTo(rotatedCoords.x - viewport->viewPos.x)) * 0x10000;
+                auto x2 = (viewport->pos.x + viewport->zoom.ApplyInversedTo(rotatedCoords.x - viewport->ViewPosWorldX()))
+                    * 0x10000;
                 auto screenWidth = std::max(ContextGetWidth(), 64);
                 auto panX = ((x2 / screenWidth) - 0x8000) >> 4;
 
-                auto y2 = (viewport->pos.y + viewport->zoom.ApplyInversedTo(rotatedCoords.y - viewport->viewPos.y)) * 0x10000;
+                auto y2 = (viewport->pos.y + viewport->zoom.ApplyInversedTo(rotatedCoords.y - viewport->ViewPosWorldY()))
+                    * 0x10000;
                 auto screenHeight = std::max(ContextGetHeight(), 64);
                 auto panY = ((y2 / screenHeight) - 0x8000) >> 4;
 

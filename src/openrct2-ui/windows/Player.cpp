@@ -309,7 +309,7 @@ namespace OpenRCT2::Ui::Windows
                         savedViewPos = centreLoc.value();
                         if (!scroll)
                         {
-                            viewport->viewPos = centreLoc.value();
+                            viewport->SetViewPosFromWorld(centreLoc.value());
                         }
                         InvalidateWidget(WIDX_VIEWPORT);
                     }
