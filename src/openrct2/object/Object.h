@@ -51,7 +51,6 @@ enum class ObjectSourceGame : uint8_t
     RCT2 = 8
 };
 
-#pragma pack(push, 1)
 /**
  * Object entry structure.
  * size: 0x10
@@ -101,8 +100,6 @@ struct RCTObjectEntry
     bool operator!=(const RCTObjectEntry& rhs) const;
 };
 static_assert(sizeof(RCTObjectEntry) == 0x10);
-
-#pragma pack(pop)
 
 struct RideFilters
 {
