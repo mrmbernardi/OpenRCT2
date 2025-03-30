@@ -7,7 +7,7 @@
  * OpenRCT2 is licensed under the GNU General Public License version 3.
  *****************************************************************************/
 
-#ifdef ENABLE_SCRIPTING
+#ifdef ENABLE_SCRIPTING_REFACTOR
 
     #include "../UiStringIds.h"
     #include "../interface/Dropdown.h"
@@ -267,9 +267,9 @@ namespace OpenRCT2::Ui::Windows
         std::optional<int32_t> TabIndex;
 
         // Event handlers
-        DukValue OnClose;
-        DukValue OnUpdate;
-        DukValue OnTabChange;
+        JSCallback OnClose;
+        JSCallback OnUpdate;
+        JSCallback OnTabChange;
 
         CustomWindowDesc() = default;
 
@@ -278,10 +278,12 @@ namespace OpenRCT2::Ui::Windows
             return MinWidth || MinHeight || MaxWidth || MaxHeight;
         }
 
-        static CustomWindowDesc FromDukValue(DukValue desc)
+        static CustomWindowDesc FromJSValue(JSContext* ctx, JSValue desc)
         {
             CustomWindowDesc result;
             result.Classification = desc["classification"].as_string();
+            // todo fix...
+            result.Classification = GetStdString(ctx, desc);
             result.X = GetOptionalInt(desc["x"]);
             result.Y = GetOptionalInt(desc["y"]);
             result.Width = desc["width"].as_int();
@@ -1123,9 +1125,9 @@ namespace OpenRCT2::Ui::Windows
 
     rct_windownumber CustomWindow::_nextWindowNumber;
 
-    WindowBase* WindowCustomOpen(std::shared_ptr<Plugin> owner, DukValue dukDesc)
+    WindowBase* WindowCustomOpen(JSContext* ctx, std::shared_ptr<Plugin> owner, JSValue descVal)
     {
-        auto desc = CustomWindowDesc::FromDukValue(dukDesc);
+        auto desc = CustomWindowDesc::FromJSValue(ctx, descVal);
         uint16_t windowFlags = WF_RESIZABLE | WF_TRANSPARENT;
         auto* windowMgr = GetWindowManager();
 
