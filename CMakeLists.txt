@@ -118,6 +118,7 @@ option(DISABLE_OPENGL   "Disable OpenGL support.")
 # TODO (mber) scripting refactor for quickjs
 option(ENABLE_SCRIPTING "Enable script / plugin support." OFF)
 set(CMAKE_CXX_FLAGS -DENABLE_SCRIPTING_REFACTOR)
+option(ENABLE_SCRIPTING_REFACTOR "Enable script / plugin support." ON)
 option(ENABLE_ASAN "Enable the AddressSanitizer.")
 option(ENABLE_UBSAN "Enable the UndefinedBehaviourSanitizer.")
 option(ENABLE_HEADERS_CHECK "Check if include directives in header files are correct. Only works with clang" OFF)
