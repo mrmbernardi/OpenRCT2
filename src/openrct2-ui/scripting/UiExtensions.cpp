@@ -25,6 +25,7 @@
 
 using namespace OpenRCT2::Scripting;
 
+ScGraphicsContext OpenRCT2::Scripting::gScGraphicsContext;
 ScTool OpenRCT2::Scripting::gScTool;
 ScUi OpenRCT2::Scripting::gScUi;
 
@@ -44,7 +45,7 @@ void UiScriptExtensions::Extend(ScriptEngine& scriptEngine)
 {
     JSContext* ctx = scriptEngine.GetContext();
 
-    // ScGraphicsContext::Register(ctx);
+    gScGraphicsContext.Register(ctx);
     // ScImageManager::Register(ctx);
     // ScTileSelection::Register(ctx);
     gScTool.Register(ctx);

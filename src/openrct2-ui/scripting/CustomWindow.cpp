@@ -546,33 +546,31 @@ namespace OpenRCT2::Ui::Windows
 
         void OnDrawWidget(WidgetIndex widgetIndex, RenderTarget& rt) override
         {
-            Window::OnDrawWidget(widgetIndex, rt);
-            // TODO (mber)
-            /*
             const auto& widget = widgets[widgetIndex];
             const auto widgetDesc = _info.GetCustomWidgetDesc(this, widgetIndex);
             if (widgetDesc != nullptr && widgetDesc->Type == "custom")
             {
                 auto& onDraw = widgetDesc->OnDraw;
-                if (onDraw.is_function())
+                if (onDraw.IsValid())
                 {
                     RenderTarget widgetDpi;
                     if (ClipDrawPixelInfo(
                             widgetDpi, rt, { windowPos.x + widget.left, windowPos.y + widget.top }, widget.width(),
                             widget.height()))
                     {
-                        auto ctx = onDraw.context();
-                        auto dukWidget = ScWidget::ToDukValue(ctx, this, widgetIndex);
-                        auto dukG = GetObjectAsDukValue(ctx, std::make_shared<ScGraphicsContext>(ctx, widgetDpi));
+                        auto ctx = onDraw.context;
+                        auto jsWidget = gScWidget.New(ctx, this, widgetIndex);
+                        auto gfx = gScGraphicsContext.New(ctx, widgetDpi);
                         auto& scriptEngine = GetContext()->GetScriptEngine();
-                        scriptEngine.ExecutePluginCall(_info.Owner, widgetDesc->OnDraw, dukWidget, { dukG }, false);
+                        scriptEngine.ExecutePluginCall(_info.Owner, onDraw.callback, jsWidget, { gfx }, false);
+                        JS_FreeValue(ctx, jsWidget);
                     }
                 }
             }
             else
             {
                 Window::OnDrawWidget(widgetIndex, rt);
-            }*/
+            }
         }
 
         void OnMouseUp(WidgetIndex widgetIndex) override

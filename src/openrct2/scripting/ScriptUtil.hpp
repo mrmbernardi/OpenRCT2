@@ -77,6 +77,11 @@ namespace OpenRCT2::Scripting
             return *this;
         }
 
+        bool IsValid() const
+        {
+            return context && JS_IsFunction(context, callback);
+        }
+
         ~JSCallback()
         {
             if (context)
@@ -189,9 +194,8 @@ namespace OpenRCT2::Scripting
         JS_FreeValue(ctx, val);
     }
 
-    inline int32_t JSToInt(JSContext* ctx, JSValue obj, const char* property)
+    inline int32_t JSToInt(JSContext* ctx, JSValue val)
     {
-        JSValue val = JS_GetPropertyStr(ctx, obj, property);
         int32_t output = -1;
         if (JS_IsNumber(val))
         {
@@ -199,6 +203,19 @@ namespace OpenRCT2::Scripting
         }
         JS_FreeValue(ctx, val);
         return output;
+    }
+
+    inline int32_t JSToInt(JSContext* ctx, JSValue obj, const char* property)
+    {
+        JSValue val = JS_GetPropertyStr(ctx, obj, property);
+        int32_t output = JSToInt(ctx, val);
+        JS_FreeValue(ctx, val);
+        return output;
+    }
+
+    inline JSValue ToJSValue(JSContext* ctx, uint8_t val)
+    {
+        return JS_NewInt32(ctx, val);
     }
 
     inline JSValue ToJSValue(JSContext* ctx, const CoordsXY& coords)
@@ -225,6 +242,14 @@ namespace OpenRCT2::Scripting
         return obj;
     }
 
+    inline JSValue ToJSValue(JSContext* ctx, const ScreenSize& size)
+    {
+        JSValue obj = JS_NewObject(ctx);
+        JS_SetPropertyStr(ctx, obj, "width", JS_NewInt32(ctx, size.width));
+        JS_SetPropertyStr(ctx, obj, "height", JS_NewInt32(ctx, size.height));
+        return obj;
+    }
+
     inline JSValue ToJSValue(JSContext* ctx, const CoordsXYZ& value)
     {
         if (value.IsNull())
@@ -239,6 +264,12 @@ namespace OpenRCT2::Scripting
         return obj;
     }
 
+    template<typename T>
+    JSValue ToJSValue(JSContext* ctx, const std::optional<T>& value)
+    {
+        return value ? ToJSValue(ctx, *value) : JS_NULL;
+    }
+
     #define JS_UNPACK_INT32(var, ctx, val)                                                                                     \
         int32_t var;                                                                                                           \
         if (!JS_IsNumber(val))                                                                                                 \
@@ -247,6 +278,18 @@ namespace OpenRCT2::Scripting
             return JS_EXCEPTION;                                                                                               \
         }                                                                                                                      \
         if (JS_ToInt32(ctx, &var, val) < 0)                                                                                    \
+        {                                                                                                                      \
+            return JS_EXCEPTION;                                                                                               \
+        }
+
+    #define JS_UNPACK_UINT32(var, ctx, val)                                                                                    \
+        uint32_t var;                                                                                                          \
+        if (!JS_IsNumber(val))                                                                                                 \
+        {                                                                                                                      \
+            JS_ThrowTypeError(ctx, "Expected number");                                                                         \
+            return JS_EXCEPTION;                                                                                               \
+        }                                                                                                                      \
+        if (JS_ToUint32(ctx, &var, val) < 0)                                                                                   \
         {                                                                                                                      \
             return JS_EXCEPTION;                                                                                               \
         }
