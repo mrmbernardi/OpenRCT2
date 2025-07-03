@@ -444,6 +444,7 @@ void ScriptEngine::Initialise()
 
 JSRuntime* ScriptEngine::_runtime = nullptr;
 ScConsole Scripting::gScConsole;
+ScNetwork Scripting::gScNetwork;
 
 void ScriptEngine::RegisterClasses(JSContext* ctx)
 {
@@ -457,7 +458,7 @@ void ScriptEngine::RegisterClasses(JSContext* ctx)
     // ScDate::Register(ctx);
     // ScDisposable::Register(ctx);
     // ScMap::Register(ctx);
-    // ScNetwork::Register(ctx);
+    gScNetwork.Register(ctx);
     // ScObjectManager::Register(ctx);
     // ScInstalledObject::Register(ctx);
     // ScObject::Register(ctx);
@@ -536,7 +537,7 @@ void ScriptEngine::InitialiseContext(JSContext* ctx) const
     // dukglue_register_global(ctx, std::make_shared<ScContext>(_execInfo, _hookEngine), "context");
     // dukglue_register_global(ctx, std::make_shared<ScDate>(), "date");
     // dukglue_register_global(ctx, std::make_shared<ScMap>(ctx), "map");
-    // dukglue_register_global(ctx, std::make_shared<ScNetwork>(ctx), "network");
+    JS_SetPropertyStr(ctx, glb, "network", gScNetwork.New(ctx));
     // dukglue_register_global(ctx, std::make_shared<ScPark>(ctx), "park");
     // dukglue_register_global(ctx, std::make_shared<ScPlugin>(), "pluginManager");
     // dukglue_register_global(ctx, std::make_shared<ScProfiler>(ctx), "profiler");

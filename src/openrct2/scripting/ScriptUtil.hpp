@@ -201,7 +201,6 @@ namespace OpenRCT2::Scripting
         {
             JS_ToInt32(ctx, &output, val);
         }
-        JS_FreeValue(ctx, val);
         return output;
     }
 
@@ -327,6 +326,13 @@ namespace OpenRCT2::Scripting
             var = result;                                                                                                      \
         }
 
+    #define JS_UNPACK_ARRAY(var, ctx, val)                                                                                     \
+        JSValue var = val;                                                                                                     \
+        if (!JS_IsArray(val))                                                                                                  \
+        {                                                                                                                      \
+            JS_ThrowTypeError(ctx, "Expected number");                                                                         \
+            return JS_EXCEPTION;                                                                                               \
+        }
 } // namespace OpenRCT2::Scripting
 
 #endif
