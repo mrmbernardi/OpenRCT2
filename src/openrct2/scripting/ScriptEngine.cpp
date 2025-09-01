@@ -457,6 +457,7 @@ ScDisposable Scripting::gScDisposable;
 ScMap Scripting::gScMap;
 ScNetwork Scripting::gScNetwork;
 ScPark Scripting::gScPark;
+ScProfiler Scripting::gScProfiler;
 ScEntity Scripting::gScEntity;
 ScThought Scripting::gScThought;
 ScPatrolArea Scripting::gScPatrolArea;
@@ -490,7 +491,7 @@ void ScriptEngine::RegisterClasses(JSContext* ctx)
     // ScParkMessage::Register(ctx);
     // ScPlayer::Register(ctx);
     // ScPlayerGroup::Register(ctx);
-    // ScProfiler::Register(ctx);
+    gScProfiler.Register(ctx);
     // ScResearch::Register(ctx);
     // ScRide::Register(ctx);
     // ScRideStation::Register(ctx);
