@@ -453,6 +453,7 @@ ScConsole Scripting::gScConsole;
 ScContext Scripting::gScContext;
 ScDisposable Scripting::gScDisposable;
 ScNetwork Scripting::gScNetwork;
+ScEntity Scripting::gScEntity;
 
 void ScriptEngine::RegisterClasses(JSContext* ctx)
 {
@@ -493,7 +494,7 @@ void ScriptEngine::RegisterClasses(JSContext* ctx)
     // ScTileElement::Register(ctx);
     // ScTrackIterator::Register(ctx);
     // ScTrackSegment::Register(ctx);
-    // ScEntity::Register(ctx);
+    gScEntity.Register(ctx);
     // ScLitter::Register(ctx);
     // ScBalloon::Register(ctx);
     // ScMoneyEffect::Register(ctx);
