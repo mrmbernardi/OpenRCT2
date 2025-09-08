@@ -15,9 +15,6 @@
 
 namespace OpenRCT2::Scripting
 {
-    class ScEntity;
-    extern ScEntity gScEntity;
-
     void ScMoneyEffect::AddFuncs(JSContext* ctx, JSValue obj)
     {
         static constexpr JSCFunctionListEntry funcs[] = {
