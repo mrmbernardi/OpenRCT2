@@ -454,6 +454,7 @@ ScContext Scripting::gScContext;
 ScDisposable Scripting::gScDisposable;
 ScNetwork Scripting::gScNetwork;
 ScEntity Scripting::gScEntity;
+ScPatrolArea Scripting::gScPatrolArea;
 
 void ScriptEngine::RegisterClasses(JSContext* ctx)
 {
@@ -507,7 +508,7 @@ void ScriptEngine::RegisterClasses(JSContext* ctx)
     // #endif
     // ScScenario::Register(ctx);
     // ScScenarioObjective::Register(ctx);
-    // ScPatrolArea::Register(ctx);
+    gScPatrolArea.Register(ctx);
     // ScStaff::Register(ctx);
     // ScHandyman::Register(ctx);
     // ScMechanic::Register(ctx);

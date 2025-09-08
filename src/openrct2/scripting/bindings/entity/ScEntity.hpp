@@ -160,7 +160,7 @@ namespace OpenRCT2::Scripting
                 {
                     case EntityType::Vehicle:
                         JS_ThrowPlainError(ctx, "Removing a vehicle is currently unsupported.");
-                        break;
+                        return JS_EXCEPTION;
                     case EntityType::Guest:
                     case EntityType::Staff:
                     {
@@ -170,11 +170,9 @@ namespace OpenRCT2::Scripting
                         if (peep == nullptr || peep->State == PeepState::OnRide || peep->State == PeepState::EnteringRide)
                         {
                             JS_ThrowPlainError(ctx, "Removing a peep that is on a ride is currently unsupported.");
+                            return JS_EXCEPTION;
                         }
-                        else
-                        {
-                            peep->Remove();
-                        }
+                        peep->Remove();
                         break;
                     }
                     case EntityType::SteamParticle:
