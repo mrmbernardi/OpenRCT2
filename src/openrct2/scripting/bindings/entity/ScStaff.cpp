@@ -290,8 +290,8 @@ namespace OpenRCT2::Scripting
 
     JSValue ScStaff::getAnimationSpriteIds(JSContext* ctx, JSValue thisVal, int argc, JSValue* argv)
     {
-        JS_UNPACK_STR(groupKey, ctx, argv[1]);
-        JS_UNPACK_UINT32(rotation, ctx, argv[2]);
+        JS_UNPACK_STR(groupKey, ctx, argv[0]);
+        JS_UNPACK_UINT32(rotation, ctx, argv[1]);
         JSValue spriteIds = JS_NewArray(ctx);
 
         auto* peep = GetStaff(thisVal);
@@ -596,10 +596,8 @@ namespace OpenRCT2::Scripting
             }
             else
             {
-                MapRange mapRange = {
-                    JSToCoordXY(ctx, coordsOrRange, "leftTop"),
-                    JSToCoordXY(ctx, coordsOrRange, "rightBottom")
-                };
+                MapRange mapRange = { JSToCoordXY(ctx, coordsOrRange, "leftTop"),
+                                      JSToCoordXY(ctx, coordsOrRange, "rightBottom") };
                 for (int32_t y = mapRange.GetTop(); y <= mapRange.GetBottom(); y += kCoordsXYStep)
                 {
                     for (int32_t x = mapRange.GetLeft(); x <= mapRange.GetRight(); x += kCoordsXYStep)
@@ -666,7 +664,7 @@ namespace OpenRCT2::Scripting
 
     JSValue ScPatrolArea::add(JSContext* ctx, JSValue thisVal, int argc, JSValue* argv)
     {
-        JS_UNPACK_OBJECT(coordsOrRange, ctx, argv[1]) // todo out of bounds?
+        JS_UNPACK_OBJECT(coordsOrRange, ctx, argv[0])
         JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
         ModifyArea(ctx, thisVal, coordsOrRange, true);
         return JS_UNDEFINED;
@@ -674,7 +672,7 @@ namespace OpenRCT2::Scripting
 
     JSValue ScPatrolArea::remove(JSContext* ctx, JSValue thisVal, int argc, JSValue* argv)
     {
-        JS_UNPACK_OBJECT(coordsOrRange, ctx, argv[1]) // todo out of bounds?
+        JS_UNPACK_OBJECT(coordsOrRange, ctx, argv[0])
         JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
         ModifyArea(ctx, thisVal, coordsOrRange, false);
         return JS_UNDEFINED;
@@ -682,7 +680,7 @@ namespace OpenRCT2::Scripting
 
     JSValue ScPatrolArea::contains(JSContext* ctx, JSValue thisVal, int argc, JSValue* argv)
     {
-        JS_UNPACK_OBJECT(coord, ctx, argv[1]) // todo out of bounds?
+        JS_UNPACK_OBJECT(coord, ctx, argv[0])
         auto staff = GetStaff(thisVal);
         if (staff != nullptr)
         {
