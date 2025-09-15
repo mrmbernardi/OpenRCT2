@@ -7,7 +7,7 @@
  * OpenRCT2 is licensed under the GNU General Public License version 3.
  *****************************************************************************/
 
-#ifdef ENABLE_SCRIPTING_REFACTOR
+#ifdef ENABLE_SCRIPTING
 
     #include "ScStaff.hpp"
 
@@ -19,58 +19,59 @@
 
 namespace OpenRCT2::Scripting
 {
-    void ScStaff::AddFuncs(JSContext* ctx, JSValue obj)
+    ScStaff::ScStaff(EntityId Id)
+        : ScPeep(Id)
     {
-        static constexpr JSCFunctionListEntry funcs[] = {
-            JS_CGETSET_DEF("staffType", &ScStaff::staffType_get, &ScStaff::staffType_set),
-            JS_CGETSET_DEF("colour", &ScStaff::colour_get, &ScStaff::colour_set),
-            JS_CGETSET_DEF("availableCostumes", &ScStaff::availableCostumes_get, nullptr),
-            JS_CGETSET_DEF("costume", &ScStaff::costume_get, &ScStaff::costume_set),
-            JS_CGETSET_DEF("patrolArea", &ScStaff::patrolArea_get, nullptr),
-            JS_CGETSET_DEF("orders", &ScStaff::orders_get, &ScStaff::orders_set),
-            JS_CGETSET_DEF("availableAnimations", &ScStaff::availableAnimations_get, nullptr),
-            JS_CGETSET_DEF("animation", &ScStaff::animation_get, &ScStaff::animation_set),
-            JS_CGETSET_DEF("animationOffset", &ScStaff::animationOffset_get, &ScStaff::animationOffset_set),
-            JS_CGETSET_DEF("animationLength", &ScStaff::animationLength_get, nullptr),
-            JS_CFUNC_DEF("getAnimationSpriteIds", 2, &ScStaff::getAnimationSpriteIds),
-            JS_CFUNC_DEF("getCostumeStrings", 0, &ScStaff::getCostumeStrings)
-        };
-        JS_SetPropertyFunctionList(ctx, obj, funcs, std::size(funcs));
     }
 
-    Staff* ScStaff::GetStaff(JSValue thisVal)
+    void ScStaff::Register(duk_context* ctx)
     {
-        auto id = GetEntityId(thisVal);
-        return OpenRCT2::GetEntity<Staff>(id);
+        dukglue_set_base_class<ScPeep, ScStaff>(ctx);
+        dukglue_register_property(ctx, &ScStaff::staffType_get, &ScStaff::staffType_set, "staffType");
+        dukglue_register_property(ctx, &ScStaff::colour_get, &ScStaff::colour_set, "colour");
+        dukglue_register_property(ctx, &ScStaff::availableCostumes_get, nullptr, "availableCostumes");
+        dukglue_register_property(ctx, &ScStaff::costume_get, &ScStaff::costume_set, "costume");
+        dukglue_register_property(ctx, &ScStaff::patrolArea_get, nullptr, "patrolArea");
+        dukglue_register_property(ctx, &ScStaff::orders_get, &ScStaff::orders_set, "orders");
+        dukglue_register_property(ctx, &ScStaff::availableAnimations_get, nullptr, "availableAnimations");
+        dukglue_register_property(ctx, &ScStaff::animation_get, &ScStaff::animation_set, "animation");
+        dukglue_register_property(ctx, &ScStaff::animationOffset_get, &ScStaff::animationOffset_set, "animationOffset");
+        dukglue_register_property(ctx, &ScStaff::animationLength_get, nullptr, "animationLength");
+        dukglue_register_method(ctx, &ScStaff::getAnimationSpriteIds, "getAnimationSpriteIds");
+        dukglue_register_method(ctx, &ScStaff::getCostumeStrings, "getCostumeStrings");
     }
 
-    JSValue ScStaff::staffType_get(JSContext* ctx, JSValue thisVal)
+    Staff* ScStaff::GetStaff() const
     {
-        auto peep = GetStaff(thisVal);
+        return OpenRCT2::GetEntity<Staff>(_id);
+    }
+
+    std::string ScStaff::staffType_get() const
+    {
+        auto peep = GetStaff();
         if (peep != nullptr)
         {
             switch (peep->AssignedStaffType)
             {
                 case StaffType::Handyman:
-                    return JS_NewString(ctx, "handyman");
+                    return "handyman";
                 case StaffType::Mechanic:
-                    return JS_NewString(ctx, "mechanic");
+                    return "mechanic";
                 case StaffType::Security:
-                    return JS_NewString(ctx, "security");
+                    return "security";
                 case StaffType::Entertainer:
-                    return JS_NewString(ctx, "entertainer");
+                    return "entertainer";
                 case StaffType::Count:
                     break;
             }
         }
-        return JS_UNDEFINED;
+        return {};
     }
 
-    JSValue ScStaff::staffType_set(JSContext* ctx, JSValue thisVal, JSValue jsValue)
+    void ScStaff::staffType_set(const std::string& value)
     {
-        JS_UNPACK_STR(value, ctx, jsValue);
-        JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
-        auto peep = GetStaff(thisVal);
+        ThrowIfGameStateNotMutable();
+        auto peep = GetStaff();
         if (peep != nullptr)
         {
             if (value == "handyman" && peep->AssignedStaffType != StaffType::Handyman)
@@ -103,27 +104,24 @@ namespace OpenRCT2::Scripting
             peep->AnimationType = peep->NextAnimationType = PeepAnimationType::Walking;
             peep->Invalidate();
         }
-        return JS_UNDEFINED;
     }
 
-    JSValue ScStaff::colour_get(JSContext* ctx, JSValue thisVal)
+    uint8_t ScStaff::colour_get() const
     {
-        auto peep = GetStaff(thisVal);
-        return JS_NewUint32(ctx, peep != nullptr ? peep->TshirtColour : 0);
+        auto peep = GetStaff();
+        return peep != nullptr ? peep->TshirtColour : 0;
     }
 
-    JSValue ScStaff::colour_set(JSContext* ctx, JSValue thisVal, JSValue jsValue)
+    void ScStaff::colour_set(uint8_t value)
     {
-        JS_UNPACK_UINT32(value, ctx, jsValue);
-        JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
-        auto peep = GetStaff(thisVal);
+        ThrowIfGameStateNotMutable();
+        auto peep = GetStaff();
         if (peep != nullptr)
         {
             peep->TshirtColour = value;
             peep->TrousersColour = value;
             peep->Invalidate();
         }
-        return JS_UNDEFINED;
     }
 
     static const std::vector<AnimationGroupResult> costumesByStaffType(StaffType staffType)
@@ -133,42 +131,39 @@ namespace OpenRCT2::Scripting
         return getAnimationGroupsByPeepType(animPeepType);
     }
 
-    JSValue ScStaff::availableCostumes_get(JSContext* ctx, JSValue thisVal)
+    std::vector<std::string> ScStaff::availableCostumes_get() const
     {
-        JSValue availableCostumes = JS_NewArray(ctx);
-        auto peep = GetStaff(thisVal);
+        std::vector<std::string> availableCostumes{};
+        auto peep = GetStaff();
         if (peep != nullptr)
         {
-            auto idx = 0;
             for (auto& costume : costumesByStaffType(peep->AssignedStaffType))
             {
-                JS_SetPropertyInt64(ctx, availableCostumes, idx++, JSFromStdString(ctx, costume.scriptName));
+                availableCostumes.push_back(std::string(costume.scriptName));
             }
         }
         return availableCostumes;
     }
 
-    JSValue ScStaff::getCostumeStrings(JSContext* ctx, JSValue thisVal, int argc, JSValue* argv)
+    std::vector<std::string> ScStaff::getCostumeStrings() const
     {
-        auto peep = GetStaff(thisVal);
+        auto peep = GetStaff();
         auto animPeepType = getAnimationPeepType(peep->AssignedStaffType);
 
-        JSValue availableCostumes = JS_NewArray(ctx);
-        auto idx = 0;
-
+        std::vector<std::string> availableCostumes{};
         for (auto& costume : getAvailableCostumeStrings(animPeepType))
         {
-            JS_SetPropertyInt64(ctx, availableCostumes, idx++, JSFromStdString(ctx, costume.friendlyName));
+            availableCostumes.push_back(costume.friendlyName);
         }
         return availableCostumes;
     }
 
-    JSValue ScStaff::costume_get(JSContext* ctx, JSValue thisVal)
+    std::string ScStaff::costume_get() const
     {
-        auto peep = GetStaff(thisVal);
+        auto peep = GetStaff();
         if (peep == nullptr)
         {
-            return JS_UNDEFINED;
+            return {};
         }
 
         auto& costumes = costumesByStaffType(peep->AssignedStaffType);
@@ -179,78 +174,69 @@ namespace OpenRCT2::Scripting
 
         if (costume != costumes.end())
         {
-            return JSFromStdString(ctx, costume->scriptName);
+            return std::string(costume->scriptName);
         }
         else
-            return JS_UNDEFINED;
+            return "";
     }
 
-    JSValue ScStaff::costume_set(JSContext* ctx, JSValue thisVal, JSValue value)
+    void ScStaff::costume_set(const DukValue& value)
     {
-        JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
+        ThrowIfGameStateNotMutable();
 
-        auto peep = GetStaff(thisVal);
+        auto peep = GetStaff();
         if (peep == nullptr)
         {
-            return JS_UNDEFINED;
+            return;
         }
 
         auto& costumes = costumesByStaffType(peep->AssignedStaffType);
         auto costume = costumes.end();
 
         // Split by type passed so as to not break old plugins
-        if (JS_IsString(value))
+        if (value.type() == DukValue::Type::STRING)
         {
-            JS_UNPACK_STR(valueString, ctx, value);
-            costume = std::find_if(costumes.begin(), costumes.end(), [valueString](auto& candidate) {
-                return candidate.scriptName == valueString;
+            costume = std::find_if(costumes.begin(), costumes.end(), [value](auto& candidate) {
+                return candidate.scriptName == value.as_string();
             });
         }
-        else if (JS_IsNumber(value))
+        else if (value.type() == DukValue::Type::NUMBER)
         {
-            JS_UNPACK_UINT32(number, ctx, value);
-            auto target = RCT12PeepAnimationGroup(number + EnumValue(RCT12PeepAnimationGroup::EntertainerPanda));
+            auto target = RCT12PeepAnimationGroup(value.as_uint() + EnumValue(RCT12PeepAnimationGroup::EntertainerPanda));
             costume = std::find_if(
                 costumes.begin(), costumes.end(), [target](auto& candidate) { return candidate.legacyPosition == target; });
         }
 
         if (costume == costumes.end())
-        {
-            JS_ThrowPlainError(ctx, "Invalid costume for this staff member");
-            return JS_EXCEPTION;
-        }
+            throw DukException() << "Invalid costume for this staff member";
 
         peep->AnimationObjectIndex = costume->objectId;
         peep->AnimationGroup = costume->group;
         peep->Invalidate();
-        return JS_UNDEFINED;
     }
 
-    JSValue ScStaff::patrolArea_get(JSContext* ctx, JSValue thisVal)
+    std::shared_ptr<ScPatrolArea> ScStaff::patrolArea_get() const
     {
-        auto staffId = GetEntityId(thisVal);
-        return gScPatrolArea.New(ctx, staffId);
+        return std::make_shared<ScPatrolArea>(_id);
     }
 
-    JSValue ScStaff::orders_get(JSContext* ctx, JSValue thisVal)
+    uint8_t ScStaff::orders_get() const
     {
-        auto peep = GetStaff(thisVal);
-        return JS_NewUint32(ctx, peep != nullptr ? peep->StaffOrders : 0);
+        auto peep = GetStaff();
+        return peep != nullptr ? peep->StaffOrders : 0;
     }
 
-    JSValue ScStaff::orders_set(JSContext* ctx, JSValue thisVal, JSValue jsValue)
+    void ScStaff::orders_set(uint8_t value)
     {
-        JS_UNPACK_UINT32(value, ctx, jsValue);
-        JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
-        auto peep = GetStaff(thisVal);
+        ThrowIfGameStateNotMutable();
+        auto peep = GetStaff();
         if (peep != nullptr)
         {
             peep->StaffOrders = value;
         }
-        return JS_UNDEFINED;
     }
 
-    EnumMap<PeepAnimationType> ScStaff::animationsByStaffType(StaffType staffType)
+    const DukEnumMap<PeepAnimationType>& ScStaff::animationsByStaffType(StaffType staffType) const
     {
         AnimationPeepType animPeepType{};
         switch (staffType)
@@ -271,36 +257,33 @@ namespace OpenRCT2::Scripting
         return getAnimationsByPeepType(animPeepType);
     }
 
-    JSValue ScStaff::availableAnimations_get(JSContext* ctx, JSValue thisVal)
+    std::vector<std::string> ScStaff::availableAnimations_get() const
     {
-        JSValue availableAnimations = JS_NewArray(ctx);
+        std::vector<std::string> availableAnimations{};
 
-        auto* peep = GetStaff(thisVal);
+        auto* peep = GetStaff();
         if (peep != nullptr)
         {
-            auto idx = 0;
             for (auto& animation : animationsByStaffType(peep->AssignedStaffType))
             {
-                JS_SetPropertyInt64(ctx, availableAnimations, idx++, JSFromStdString(ctx, animation.first));
+                availableAnimations.push_back(std::string(animation.first));
             }
         }
 
         return availableAnimations;
     }
 
-    JSValue ScStaff::getAnimationSpriteIds(JSContext* ctx, JSValue thisVal, int argc, JSValue* argv)
+    std::vector<uint32_t> ScStaff::getAnimationSpriteIds(std::string groupKey, uint8_t rotation) const
     {
-        JS_UNPACK_STR(groupKey, ctx, argv[0]);
-        JS_UNPACK_UINT32(rotation, ctx, argv[1]);
-        JSValue spriteIds = JS_NewArray(ctx);
+        std::vector<uint32_t> spriteIds{};
 
-        auto* peep = GetStaff(thisVal);
+        auto* peep = GetStaff();
         if (peep == nullptr)
         {
             return spriteIds;
         }
 
-        auto animationGroups = animationsByStaffType(peep->AssignedStaffType);
+        auto& animationGroups = animationsByStaffType(peep->AssignedStaffType);
         auto animationType = animationGroups.TryGet(groupKey);
         if (animationType == std::nullopt)
         {
@@ -311,7 +294,6 @@ namespace OpenRCT2::Scripting
         auto* animObj = objManager.GetLoadedObject<PeepAnimationsObject>(peep->AnimationObjectIndex);
 
         const auto& animationGroup = animObj->GetPeepAnimation(peep->AnimationGroup, *animationType);
-        auto idx = 0;
         for (auto frameOffset : animationGroup.frame_offsets)
         {
             auto imageId = animationGroup.base_image;
@@ -320,36 +302,35 @@ namespace OpenRCT2::Scripting
             else
                 imageId += frameOffset;
 
-            JS_SetPropertyInt64(ctx, spriteIds, idx++, JS_NewUint32(ctx, imageId));
+            spriteIds.push_back(imageId);
         }
 
         return spriteIds;
     }
 
-    JSValue ScStaff::animation_get(JSContext* ctx, JSValue thisVal)
+    std::string ScStaff::animation_get() const
     {
-        auto* peep = GetStaff(thisVal);
+        auto* peep = GetStaff();
         if (peep == nullptr)
         {
-            return JS_NULL;
+            return nullptr;
         }
 
-        auto animationGroups = animationsByStaffType(peep->AssignedStaffType);
-        return JSFromStdString(ctx, animationGroups[peep->AnimationType]);
+        auto& animationGroups = animationsByStaffType(peep->AssignedStaffType);
+        std::string_view action = animationGroups[peep->AnimationType];
+        return std::string(action);
     }
 
-    JSValue ScStaff::animation_set(JSContext* ctx, JSValue thisVal, JSValue jsValue)
+    void ScStaff::animation_set(std::string groupKey)
     {
-        JS_UNPACK_STR(groupKey, ctx, jsValue);
-        JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
+        ThrowIfGameStateNotMutable();
 
-        auto* peep = GetStaff(thisVal);
-        auto animationGroups = animationsByStaffType(peep->AssignedStaffType);
+        auto* peep = GetStaff();
+        auto& animationGroups = animationsByStaffType(peep->AssignedStaffType);
         auto newType = animationGroups.TryGet(groupKey);
         if (newType == std::nullopt)
         {
-            JS_ThrowPlainError(ctx, "Invalid animation for this staff member (%s)", groupKey.data());
-            return JS_EXCEPTION;
+            throw DukException() << "Invalid animation for this staff member (" << groupKey << ")";
         }
 
         peep->AnimationType = peep->NextAnimationType = *newType;
@@ -368,27 +349,27 @@ namespace OpenRCT2::Scripting
         peep->Invalidate();
         peep->UpdateSpriteBoundingBox();
         peep->Invalidate();
-        return JS_UNDEFINED;
     }
 
-    JSValue ScStaff::animationOffset_get(JSContext* ctx, JSValue thisVal)
+    uint8_t ScStaff::animationOffset_get() const
     {
-        auto* peep = GetStaff(thisVal);
+        auto* peep = GetStaff();
         if (peep == nullptr)
         {
-            return JS_NewUint32(ctx, 0);
+            return 0;
         }
 
-        auto frame = peep->IsActionWalking() ? peep->WalkingAnimationFrameNum : peep->AnimationFrameNum;
-        return JS_NewUint32(ctx, frame);
+        if (peep->IsActionWalking())
+            return peep->WalkingAnimationFrameNum;
+        else
+            return peep->AnimationFrameNum;
     }
 
-    JSValue ScStaff::animationOffset_set(JSContext* ctx, JSValue thisVal, JSValue jsValue)
+    void ScStaff::animationOffset_set(uint8_t offset)
     {
-        JS_UNPACK_UINT32(offset, ctx, jsValue);
-        JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
+        ThrowIfGameStateNotMutable();
 
-        auto* peep = GetStaff(thisVal);
+        auto* peep = GetStaff();
 
         auto& objManager = GetContext()->GetObjectManager();
         auto* animObj = objManager.GetLoadedObject<PeepAnimationsObject>(peep->AnimationObjectIndex);
@@ -406,202 +387,230 @@ namespace OpenRCT2::Scripting
         peep->Invalidate();
         peep->UpdateSpriteBoundingBox();
         peep->Invalidate();
-        return JS_UNDEFINED;
     }
 
-    JSValue ScStaff::animationLength_get(JSContext* ctx, JSValue thisVal)
+    uint8_t ScStaff::animationLength_get() const
     {
-        auto* peep = GetStaff(thisVal);
+        auto* peep = GetStaff();
         if (peep == nullptr)
         {
-            return JS_NewUint32(ctx, 0);
+            return 0;
         }
 
         auto& objManager = GetContext()->GetObjectManager();
         auto* animObj = objManager.GetLoadedObject<PeepAnimationsObject>(peep->AnimationObjectIndex);
 
         const auto& animationGroup = animObj->GetPeepAnimation(peep->AnimationGroup, peep->AnimationType);
-        auto length = static_cast<uint8_t>(animationGroup.frame_offsets.size());
-        return JS_NewUint32(ctx, length);
+        return static_cast<uint8_t>(animationGroup.frame_offsets.size());
     }
 
-    void ScHandyman::AddFuncs(JSContext* ctx, JSValue obj)
+    ScHandyman::ScHandyman(EntityId Id)
+        : ScStaff(Id)
     {
-        static constexpr JSCFunctionListEntry funcs[] = {
-            JS_CGETSET_DEF("lawnsMown", &ScHandyman::lawnsMown_get, nullptr),
-            JS_CGETSET_DEF("gardensWatered", &ScHandyman::gardensWatered_get, nullptr),
-            JS_CGETSET_DEF("litterSwept", &ScHandyman::litterSwept_get, nullptr),
-            JS_CGETSET_DEF("binsEmptied", &ScHandyman::binsEmptied_get, nullptr),
-        };
-        JS_SetPropertyFunctionList(ctx, obj, funcs, std::size(funcs));
     }
 
-    JSValue ScHandyman::lawnsMown_get(JSContext* ctx, JSValue thisVal)
+    void ScHandyman::Register(duk_context* ctx)
     {
-        auto peep = GetStaff(thisVal);
+        dukglue_set_base_class<ScStaff, ScHandyman>(ctx);
+        dukglue_register_property(ctx, &ScHandyman::lawnsMown_get, nullptr, "lawnsMown");
+        dukglue_register_property(ctx, &ScHandyman::gardensWatered_get, nullptr, "gardensWatered");
+        dukglue_register_property(ctx, &ScHandyman::litterSwept_get, nullptr, "litterSwept");
+        dukglue_register_property(ctx, &ScHandyman::binsEmptied_get, nullptr, "binsEmptied");
+    }
+
+    Staff* ScHandyman::GetHandyman() const
+    {
+        return OpenRCT2::GetEntity<Staff>(_id);
+    }
+
+    DukValue ScHandyman::lawnsMown_get() const
+    {
+        auto& scriptEngine = GetContext()->GetScriptEngine();
+        auto* ctx = scriptEngine.GetContext();
+        auto peep = GetHandyman();
         if (peep != nullptr && peep->AssignedStaffType == StaffType::Handyman)
         {
-            return JS_NewUint32(ctx, peep->StaffLawnsMown);
+            duk_push_uint(ctx, peep->StaffLawnsMown);
         }
         else
         {
-            return JS_NULL;
+            duk_push_null(ctx);
         }
+        return DukValue::take_from_stack(ctx);
     }
 
-    JSValue ScHandyman::gardensWatered_get(JSContext* ctx, JSValue thisVal)
+    DukValue ScHandyman::gardensWatered_get() const
     {
-        auto peep = GetStaff(thisVal);
+        auto& scriptEngine = GetContext()->GetScriptEngine();
+        auto* ctx = scriptEngine.GetContext();
+        auto peep = GetHandyman();
         if (peep != nullptr && peep->AssignedStaffType == StaffType::Handyman)
         {
-            return JS_NewUint32(ctx, peep->StaffGardensWatered);
+            duk_push_uint(ctx, peep->StaffGardensWatered);
         }
         else
         {
-            return JS_NULL;
+            duk_push_null(ctx);
         }
+        return DukValue::take_from_stack(ctx);
     }
 
-    JSValue ScHandyman::litterSwept_get(JSContext* ctx, JSValue thisVal)
+    DukValue ScHandyman::litterSwept_get() const
     {
-        auto peep = GetStaff(thisVal);
+        auto& scriptEngine = GetContext()->GetScriptEngine();
+        auto* ctx = scriptEngine.GetContext();
+        auto peep = GetHandyman();
         if (peep != nullptr && peep->AssignedStaffType == StaffType::Handyman)
         {
-            return JS_NewUint32(ctx, peep->StaffLitterSwept);
+            duk_push_uint(ctx, peep->StaffLitterSwept);
         }
         else
         {
-            return JS_NULL;
+            duk_push_null(ctx);
         }
+        return DukValue::take_from_stack(ctx);
     }
 
-    JSValue ScHandyman::binsEmptied_get(JSContext* ctx, JSValue thisVal)
+    DukValue ScHandyman::binsEmptied_get() const
     {
-        auto peep = GetStaff(thisVal);
+        auto& scriptEngine = GetContext()->GetScriptEngine();
+        auto* ctx = scriptEngine.GetContext();
+        auto peep = GetHandyman();
         if (peep != nullptr && peep->AssignedStaffType == StaffType::Handyman)
         {
-            return JS_NewUint32(ctx, peep->StaffBinsEmptied);
+            duk_push_uint(ctx, peep->StaffBinsEmptied);
         }
         else
         {
-            return JS_NULL;
+            duk_push_null(ctx);
         }
+        return DukValue::take_from_stack(ctx);
     }
 
-    void ScMechanic::AddFuncs(JSContext* ctx, JSValue obj)
+    ScMechanic::ScMechanic(EntityId Id)
+        : ScStaff(Id)
     {
-        static constexpr JSCFunctionListEntry funcs[] = {
-            JS_CGETSET_DEF("ridesFixed", &ScMechanic::ridesFixed_get, nullptr),
-            JS_CGETSET_DEF("ridesInspected", &ScMechanic::ridesInspected_get, nullptr),
-        };
-        JS_SetPropertyFunctionList(ctx, obj, funcs, std::size(funcs));
     }
 
-    JSValue ScMechanic::ridesFixed_get(JSContext* ctx, JSValue thisVal)
+    void ScMechanic::Register(duk_context* ctx)
     {
-        auto peep = GetStaff(thisVal);
+        dukglue_set_base_class<ScStaff, ScMechanic>(ctx);
+        dukglue_register_property(ctx, &ScMechanic::ridesFixed_get, nullptr, "ridesFixed");
+        dukglue_register_property(ctx, &ScMechanic::ridesInspected_get, nullptr, "ridesInspected");
+    }
+
+    Staff* ScMechanic::GetMechanic() const
+    {
+        return OpenRCT2::GetEntity<Staff>(_id);
+    }
+
+    DukValue ScMechanic::ridesFixed_get() const
+    {
+        auto& scriptEngine = GetContext()->GetScriptEngine();
+        auto* ctx = scriptEngine.GetContext();
+        auto peep = GetMechanic();
         if (peep != nullptr && peep->AssignedStaffType == StaffType::Mechanic)
         {
-            return JS_NewUint32(ctx, peep->StaffRidesFixed);
+            duk_push_uint(ctx, peep->StaffRidesFixed);
         }
         else
         {
-            return JS_NULL;
+            duk_push_null(ctx);
         }
+        return DukValue::take_from_stack(ctx);
     }
 
-    JSValue ScMechanic::ridesInspected_get(JSContext* ctx, JSValue thisVal)
+    DukValue ScMechanic::ridesInspected_get() const
     {
-        auto peep = GetStaff(thisVal);
+        auto& scriptEngine = GetContext()->GetScriptEngine();
+        auto* ctx = scriptEngine.GetContext();
+        auto peep = GetMechanic();
         if (peep != nullptr && peep->AssignedStaffType == StaffType::Mechanic)
         {
-            return JS_NewUint32(ctx, peep->StaffRidesInspected);
+            duk_push_uint(ctx, peep->StaffRidesInspected);
         }
         else
         {
-            return JS_NULL;
+            duk_push_null(ctx);
         }
+        return DukValue::take_from_stack(ctx);
     }
 
-    void ScSecurity::AddFuncs(JSContext* ctx, JSValue obj)
+    ScSecurity::ScSecurity(EntityId Id)
+        : ScStaff(Id)
     {
-        static constexpr JSCFunctionListEntry funcs[] = {
-            JS_CGETSET_DEF("vandalsStopped", &ScSecurity::vandalsStopped_get, nullptr),
-        };
-        JS_SetPropertyFunctionList(ctx, obj, funcs, std::size(funcs));
     }
 
-    JSValue ScSecurity::vandalsStopped_get(JSContext* ctx, JSValue thisVal)
+    void ScSecurity::Register(duk_context* ctx)
     {
-        auto peep = GetStaff(thisVal);
+        dukglue_set_base_class<ScStaff, ScSecurity>(ctx);
+        dukglue_register_property(ctx, &ScSecurity::vandalsStopped_get, nullptr, "vandalsStopped");
+    }
+
+    Staff* ScSecurity::GetSecurity() const
+    {
+        return OpenRCT2::GetEntity<Staff>(_id);
+    }
+
+    DukValue ScSecurity::vandalsStopped_get() const
+    {
+        auto& scriptEngine = GetContext()->GetScriptEngine();
+        auto* ctx = scriptEngine.GetContext();
+        auto peep = GetSecurity();
         if (peep != nullptr && peep->AssignedStaffType == StaffType::Security)
         {
-            return JS_NewUint32(ctx, peep->StaffVandalsStopped);
+            duk_push_uint(ctx, peep->StaffVandalsStopped);
         }
         else
         {
-            return JS_NULL;
+            duk_push_null(ctx);
         }
+        return DukValue::take_from_stack(ctx);
     }
 
-    using OpaquePatrolAreaData = struct
+    ScPatrolArea::ScPatrolArea(EntityId id)
+        : _staffId(id)
     {
-        EntityId staffId;
-    };
-
-    JSValue ScPatrolArea::New(JSContext* ctx, EntityId staffId)
-    {
-        static constexpr JSCFunctionListEntry funcs[] = {
-            JS_CGETSET_DEF("tiles", &ScPatrolArea::tiles_get, &ScPatrolArea::tiles_set),
-            JS_CFUNC_DEF("clear", 0, &ScPatrolArea::clear),
-            JS_CFUNC_DEF("add", 1, &ScPatrolArea::add),
-            JS_CFUNC_DEF("remove", 1, &ScPatrolArea::remove),
-            JS_CFUNC_DEF("contains", 1, &ScPatrolArea::contains),
-        };
-        return MakeWithOpaque(ctx, funcs, new OpaquePatrolAreaData{ staffId });
     }
 
-    void ScPatrolArea::Register(JSContext* ctx)
+    void ScPatrolArea::Register(duk_context* ctx)
     {
-        RegisterBaseStr(ctx, "PatrolArea", Finalize);
+        dukglue_register_property(ctx, &ScPatrolArea::tiles_get, &ScPatrolArea::tiles_set, "tiles");
+        dukglue_register_method(ctx, &ScPatrolArea::clear, "clear");
+        dukglue_register_method(ctx, &ScPatrolArea::add, "add");
+        dukglue_register_method(ctx, &ScPatrolArea::remove, "remove");
+        dukglue_register_method(ctx, &ScPatrolArea::contains, "contains");
     }
 
-    void ScPatrolArea::Finalize(JSRuntime* rt, JSValue thisVal)
+    Staff* ScPatrolArea::GetStaff() const
     {
-        OpaquePatrolAreaData* data = gScPatrolArea.GetOpaque<OpaquePatrolAreaData*>(thisVal);
-        if (data)
-            delete data;
+        return GetEntity<Staff>(_staffId);
     }
 
-    Staff* ScPatrolArea::GetStaff(JSValue thisVal)
+    void ScPatrolArea::ModifyArea(const DukValue& coordsOrRange, bool value) const
     {
-        OpaquePatrolAreaData* data = gScPatrolArea.GetOpaque<OpaquePatrolAreaData*>(thisVal);
-        return GetEntity<Staff>(data->staffId);
-    }
-
-    void ScPatrolArea::ModifyArea(JSContext* ctx, JSValue thisVal, JSValue coordsOrRange, bool reset)
-    {
-        auto staff = GetStaff(thisVal);
+        auto staff = GetStaff();
         if (staff != nullptr)
         {
-            if (JS_IsArray(coordsOrRange))
+            if (coordsOrRange.is_array())
             {
-                JSIterateArray(ctx, coordsOrRange, [staff, reset](JSContext* c, JSValue v) {
-                    auto coord = JSToCoordXY(c, v);
-                    staff->SetPatrolArea(coord, reset);
+                auto dukCoords = coordsOrRange.as_array();
+                for (const auto& dukCoord : dukCoords)
+                {
+                    auto coord = FromDuk<CoordsXY>(dukCoord);
+                    staff->SetPatrolArea(coord, value);
                     MapInvalidateTileFull(coord);
-                });
+                }
             }
             else
             {
-                MapRange mapRange = { JSToCoordXY(ctx, coordsOrRange, "leftTop"),
-                                      JSToCoordXY(ctx, coordsOrRange, "rightBottom") };
+                auto mapRange = FromDuk<MapRange>(coordsOrRange);
                 for (int32_t y = mapRange.GetTop(); y <= mapRange.GetBottom(); y += kCoordsXYStep)
                 {
                     for (int32_t x = mapRange.GetLeft(); x <= mapRange.GetRight(); x += kCoordsXYStep)
                     {
                         CoordsXY coord(x, y);
-                        staff->SetPatrolArea(coord, reset);
+                        staff->SetPatrolArea(coord, value);
                         MapInvalidateTileFull(coord);
                     }
                 }
@@ -610,82 +619,78 @@ namespace OpenRCT2::Scripting
         }
     }
 
-    JSValue ScPatrolArea::tiles_get(JSContext* ctx, JSValue thisVal)
+    DukValue ScPatrolArea::tiles_get() const
     {
-        auto array = JS_NewArray(ctx);
+        auto ctx = GetContext()->GetScriptEngine().GetContext();
 
-        auto staff = GetStaff(thisVal);
+        duk_push_array(ctx);
+
+        auto staff = GetStaff();
         if (staff != nullptr && staff->PatrolInfo != nullptr)
         {
             auto tiles = staff->PatrolInfo->ToVector();
 
-            auto index = 0;
+            duk_uarridx_t index = 0;
             for (const auto& tile : tiles)
             {
-                auto coords = ToJSValue(ctx, tile);
-                JS_SetPropertyInt64(ctx, array, index, coords);
+                auto dukCoord = ToDuk(ctx, tile.ToCoordsXY());
+                dukCoord.push();
+                duk_put_prop_index(ctx, -2, index);
                 index++;
             }
         }
 
-        return array;
+        return DukValue::take_from_stack(ctx, -1);
     }
 
-    JSValue ScPatrolArea::tiles_set(JSContext* ctx, JSValue thisVal, JSValue value)
+    void ScPatrolArea::tiles_set(const DukValue& value)
     {
-        JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
+        ThrowIfGameStateNotMutable();
 
-        auto staff = GetStaff(thisVal);
+        auto staff = GetStaff();
         if (staff != nullptr)
         {
             staff->ClearPatrolArea();
-            if (JS_IsArray(value))
+            if (value.is_array())
             {
-                ModifyArea(ctx, thisVal, value, true);
+                ModifyArea(value, true);
             }
         }
-        return JS_UNDEFINED;
     }
 
-    JSValue ScPatrolArea::clear(JSContext* ctx, JSValue thisVal, int argc, JSValue* argv)
+    void ScPatrolArea::clear()
     {
-        JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
+        ThrowIfGameStateNotMutable();
 
-        auto staff = GetStaff(thisVal);
+        auto staff = GetStaff();
         if (staff != nullptr)
         {
             staff->ClearPatrolArea();
             UpdateConsolidatedPatrolAreas();
         }
-        return JS_UNDEFINED;
     }
 
-    JSValue ScPatrolArea::add(JSContext* ctx, JSValue thisVal, int argc, JSValue* argv)
+    void ScPatrolArea::add(const DukValue& coordsOrRange)
     {
-        JS_UNPACK_OBJECT(coordsOrRange, ctx, argv[0])
-        JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
-        ModifyArea(ctx, thisVal, coordsOrRange, true);
-        return JS_UNDEFINED;
+        ThrowIfGameStateNotMutable();
+        ModifyArea(coordsOrRange, true);
     }
 
-    JSValue ScPatrolArea::remove(JSContext* ctx, JSValue thisVal, int argc, JSValue* argv)
+    void ScPatrolArea::remove(const DukValue& coordsOrRange)
     {
-        JS_UNPACK_OBJECT(coordsOrRange, ctx, argv[0])
-        JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
-        ModifyArea(ctx, thisVal, coordsOrRange, false);
-        return JS_UNDEFINED;
+        ThrowIfGameStateNotMutable();
+        ModifyArea(coordsOrRange, false);
     }
 
-    JSValue ScPatrolArea::contains(JSContext* ctx, JSValue thisVal, int argc, JSValue* argv)
+    bool ScPatrolArea::contains(const DukValue& coord) const
     {
-        JS_UNPACK_OBJECT(coord, ctx, argv[0])
-        auto staff = GetStaff(thisVal);
+        auto staff = GetStaff();
         if (staff != nullptr)
         {
-            auto pos = JSToCoordXY(ctx, coord);
-            return JS_NewBool(ctx, staff->IsLocationInPatrol(pos));
+            auto pos = FromDuk<CoordsXY>(coord);
+            return staff->IsLocationInPatrol(pos);
         }
-        return JS_NewBool(ctx, false);
+        return false;
     }
 
 } // namespace OpenRCT2::Scripting

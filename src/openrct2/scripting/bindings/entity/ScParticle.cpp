@@ -9,240 +9,221 @@
 
 #include "ScParticle.hpp"
 
-#include "../../../core/EnumMap.hpp"
 #include "../ride/ScRide.hpp"
 
-#ifdef ENABLE_SCRIPTING_REFACTOR
+#ifdef ENABLE_SCRIPTING
 
 namespace OpenRCT2::Scripting
 {
-    static const EnumMap<uint8_t> CrashParticleTypeMap({
-        { "corner", 0 },
-        { "rod", 1 },
-        { "wheel", 2 },
-        { "panel", 3 },
-        { "seat", 4 },
-    });
+    static const DukEnumMap<uint8_t> CrashParticleTypeMap(
+        {
+            { "corner", 0 },
+            { "rod", 1 },
+            { "wheel", 2 },
+            { "panel", 3 },
+            { "seat", 4 },
+        });
 
-    void ScCrashedVehicleParticle::AddFuncs(JSContext* ctx, JSValue obj)
+    ScCrashedVehicleParticle::ScCrashedVehicleParticle(EntityId id)
+        : ScEntity(id)
     {
-        static constexpr JSCFunctionListEntry funcs[] = {
-            JS_CGETSET_DEF(
-                "acceleration", &ScCrashedVehicleParticle::acceleration_get, &ScCrashedVehicleParticle::acceleration_set),
-            JS_CGETSET_DEF("velocity", &ScCrashedVehicleParticle::velocity_get, &ScCrashedVehicleParticle::velocity_set),
-            JS_CGETSET_DEF("colours", &ScCrashedVehicleParticle::colours_get, &ScCrashedVehicleParticle::colours_set),
-            JS_CGETSET_DEF("timeToLive", &ScCrashedVehicleParticle::timeToLive_get, &ScCrashedVehicleParticle::timeToLive_set),
-            JS_CGETSET_DEF(
-                "crashParticleType", &ScCrashedVehicleParticle::crashedSpriteBase_get,
-                &ScCrashedVehicleParticle::crashedSpriteBase_set),
-            JS_CGETSET_DEF("frame", &ScCrashedVehicleParticle::frame_get, &ScCrashedVehicleParticle::frame_set),
-            JS_CFUNC_DEF("launch", 1, &ScCrashedVehicleParticle::Launch),
-        };
-        JS_SetPropertyFunctionList(ctx, obj, funcs, std::size(funcs));
     }
 
-    VehicleCrashParticle* ScCrashedVehicleParticle::GetCrashedVehicleParticle(JSValue thisVal)
+    void ScCrashedVehicleParticle::Register(duk_context* ctx)
     {
-        auto id = GetEntityId(thisVal);
-        return OpenRCT2::GetEntity<VehicleCrashParticle>(id);
+        dukglue_set_base_class<ScEntity, ScCrashedVehicleParticle>(ctx);
+        dukglue_register_property(
+            ctx, &ScCrashedVehicleParticle::acceleration_get, &ScCrashedVehicleParticle::acceleration_set, "acceleration");
+        dukglue_register_property(
+            ctx, &ScCrashedVehicleParticle::velocity_get, &ScCrashedVehicleParticle::velocity_set, "velocity");
+        dukglue_register_property(
+            ctx, &ScCrashedVehicleParticle::colours_get, &ScCrashedVehicleParticle::colours_set, "colours");
+        dukglue_register_property(
+            ctx, &ScCrashedVehicleParticle::timeToLive_get, &ScCrashedVehicleParticle::timeToLive_set, "timeToLive");
+        dukglue_register_property(
+            ctx, &ScCrashedVehicleParticle::crashedSpriteBase_get, &ScCrashedVehicleParticle::crashedSpriteBase_set,
+            "crashParticleType");
+        dukglue_register_property(ctx, &ScCrashedVehicleParticle::frame_get, &ScCrashedVehicleParticle::frame_set, "frame");
+        dukglue_register_method(ctx, &ScCrashedVehicleParticle::Launch, "launch");
     }
 
-    JSValue ScCrashedVehicleParticle::frame_set(JSContext* ctx, JSValue thisVal, JSValue jsValue)
+    VehicleCrashParticle* ScCrashedVehicleParticle::GetCrashedVehicleParticle() const
     {
-        JS_UNPACK_UINT32(value, ctx, jsValue);
-        JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
-        auto entity = GetCrashedVehicleParticle(thisVal);
+        return OpenRCT2::GetEntity<VehicleCrashParticle>(_id);
+    }
+
+    void ScCrashedVehicleParticle::frame_set(uint8_t value)
+    {
+        auto entity = GetCrashedVehicleParticle();
         if (entity != nullptr)
         {
             entity->frame = std::clamp<uint16_t>(value, 0, kCrashedVehicleParticleNumberSprites - 1)
                 * kCrashedVehicleParticleFrameToSprite;
             entity->Invalidate();
         }
-        return JS_UNDEFINED;
     }
-    JSValue ScCrashedVehicleParticle::frame_get(JSContext* ctx, JSValue thisVal)
+    uint8_t ScCrashedVehicleParticle::frame_get() const
     {
-        auto entity = GetCrashedVehicleParticle(thisVal);
-        auto frame = (entity != nullptr) ? entity->frame / kCrashedVehicleParticleFrameToSprite : 0;
-        return JS_NewUint32(ctx, frame);
+        auto entity = GetCrashedVehicleParticle();
+        if (entity != nullptr)
+        {
+            return entity->frame / kCrashedVehicleParticleFrameToSprite;
+        }
+        return 0;
     }
 
-    JSValue ScCrashedVehicleParticle::crashedSpriteBase_set(JSContext* ctx, JSValue thisVal, JSValue jsValue)
+    void ScCrashedVehicleParticle::crashedSpriteBase_set(const std::string& value)
     {
-        JS_UNPACK_STR(value, ctx, jsValue);
-        JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
-        auto entity = GetCrashedVehicleParticle(thisVal);
+        auto entity = GetCrashedVehicleParticle();
         if (entity != nullptr)
         {
             entity->crashed_sprite_base = CrashParticleTypeMap[value];
             entity->Invalidate();
         }
-        return JS_UNDEFINED;
     }
-    JSValue ScCrashedVehicleParticle::crashedSpriteBase_get(JSContext* ctx, JSValue thisVal)
+    std::string ScCrashedVehicleParticle::crashedSpriteBase_get() const
     {
-        auto entity = GetCrashedVehicleParticle(thisVal);
+        auto entity = GetCrashedVehicleParticle();
         if (entity != nullptr)
         {
-            return JSFromStdString(ctx, CrashParticleTypeMap[entity->crashed_sprite_base]);
+            return std::string(CrashParticleTypeMap[entity->crashed_sprite_base]);
         }
-        return JS_UNDEFINED;
+        return {};
     }
 
-    JSValue ScCrashedVehicleParticle::timeToLive_set(JSContext* ctx, JSValue thisVal, JSValue jsValue)
+    void ScCrashedVehicleParticle::timeToLive_set(uint16_t value)
     {
-        JS_UNPACK_UINT32(value, ctx, jsValue);
-        JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
-        auto entity = GetCrashedVehicleParticle(thisVal);
+        auto entity = GetCrashedVehicleParticle();
         if (entity != nullptr)
         {
             entity->time_to_live = value;
         }
-        return JS_UNDEFINED;
     }
-    JSValue ScCrashedVehicleParticle::timeToLive_get(JSContext* ctx, JSValue thisVal)
+    uint16_t ScCrashedVehicleParticle::timeToLive_get() const
     {
-        auto entity = GetCrashedVehicleParticle(thisVal);
-        return JS_NewUint32(ctx, entity == nullptr ? 0 : entity->time_to_live);
-    }
-
-    JSValue ScCrashedVehicleParticle::velocity_set(JSContext* ctx, JSValue thisVal, JSValue jsValue)
-    {
-        JS_UNPACK_OBJECT(obj, ctx, jsValue);
-        JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
-        auto entity = GetCrashedVehicleParticle(thisVal);
+        auto entity = GetCrashedVehicleParticle();
         if (entity != nullptr)
         {
-            auto velocity = JSToCoordXYZ(ctx, obj);
+            return entity->time_to_live;
+        }
+        return 0;
+    }
+
+    void ScCrashedVehicleParticle::velocity_set(const DukValue& value)
+    {
+        auto entity = GetCrashedVehicleParticle();
+        if (entity != nullptr)
+        {
+            auto velocity = FromDuk<CoordsXYZ>(value);
             entity->velocity_x = velocity.x;
             entity->velocity_y = velocity.y;
             entity->velocity_z = velocity.z;
         }
-        return JS_UNDEFINED;
     }
-    JSValue ScCrashedVehicleParticle::velocity_get(JSContext* ctx, JSValue thisVal)
+    DukValue ScCrashedVehicleParticle::velocity_get() const
     {
-        auto entity = GetCrashedVehicleParticle(thisVal);
+        auto ctx = GetContext()->GetScriptEngine().GetContext();
+        auto entity = GetCrashedVehicleParticle();
         if (entity != nullptr)
         {
-            return ToJSValue(ctx, CoordsXYZ(entity->velocity_x, entity->velocity_y, entity->velocity_z));
+            return ToDuk(ctx, CoordsXYZ(entity->velocity_x, entity->velocity_y, entity->velocity_z));
         }
-        return JS_UNDEFINED;
+        return {};
     }
 
-    JSValue ScCrashedVehicleParticle::acceleration_set(JSContext* ctx, JSValue thisVal, JSValue jsValue)
+    void ScCrashedVehicleParticle::acceleration_set(const DukValue& value)
     {
-        JS_UNPACK_OBJECT(obj, ctx, jsValue);
-        JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
-        auto entity = GetCrashedVehicleParticle(thisVal);
+        auto entity = GetCrashedVehicleParticle();
         if (entity != nullptr)
         {
-            auto acceleration = JSToCoordXYZ(ctx, obj);
+            auto acceleration = FromDuk<CoordsXYZ>(value);
             entity->acceleration_x = acceleration.x;
             entity->acceleration_y = acceleration.y;
             entity->acceleration_z = acceleration.z;
         }
-        return JS_UNDEFINED;
     }
-    JSValue ScCrashedVehicleParticle::acceleration_get(JSContext* ctx, JSValue thisVal)
+    DukValue ScCrashedVehicleParticle::acceleration_get() const
     {
-        auto entity = GetCrashedVehicleParticle(thisVal);
+        auto ctx = GetContext()->GetScriptEngine().GetContext();
+        auto entity = GetCrashedVehicleParticle();
         if (entity != nullptr)
         {
-            return ToJSValue(ctx, CoordsXYZ(entity->acceleration_x, entity->acceleration_y, entity->acceleration_z));
+            return ToDuk(ctx, CoordsXYZ(entity->acceleration_x, entity->acceleration_y, entity->acceleration_z));
         }
-        return JS_UNDEFINED;
+        return {};
     }
 
-    JSValue ScCrashedVehicleParticle::Launch(JSContext* ctx, JSValue thisVal, int argc, JSValue* argv)
+    void ScCrashedVehicleParticle::Launch(const DukValue& value)
     {
-        JS_UNPACK_OBJECT(obj, ctx, argv[0]);
-        JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
-        auto entity = GetCrashedVehicleParticle(thisVal);
+        auto entity = GetCrashedVehicleParticle();
         if (entity != nullptr)
         {
             entity->SetSpriteData();
             entity->Launch();
 
-            if (JS_IsUndefined(obj))
-                return JS_UNDEFINED;
+            if (value.type() == DukValue::Type::UNDEFINED)
+                return;
 
-            auto colours = JS_GetPropertyStr(ctx, obj, "colours");
-            auto acceleration = JS_GetPropertyStr(ctx, obj, "acceleration");
-            auto velocity = JS_GetPropertyStr(ctx, obj, "velocity");
-            auto timeToLive = JS_GetPropertyStr(ctx, obj, "timeToLive");
-            auto frame = JS_GetPropertyStr(ctx, obj, "frame");
-            auto crashParticleType = JS_GetPropertyStr(ctx, obj, "crashParticleType");
-
-            if (JS_IsObject(colours))
+            if (value["colours"].type() == DukValue::Type::OBJECT)
             {
-                entity->colour[0] = JSToUint(ctx, colours, "body");
-                entity->colour[1] = JSToUint(ctx, colours, "trim");
+                auto coloursInt = FromDuk<VehicleColour>(value["colours"]);
+                entity->colour[0] = coloursInt.Body;
+                entity->colour[1] = coloursInt.Trim;
             }
-            if (JS_IsObject(acceleration))
+            if (value["acceleration"].type() == DukValue::Type::OBJECT)
             {
-                auto accelerationXYZ = JSToCoordXYZ(ctx, acceleration);
+                auto accelerationXYZ = FromDuk<CoordsXYZ>(value["acceleration"]);
                 entity->acceleration_x = accelerationXYZ.x;
                 entity->acceleration_y = accelerationXYZ.y;
                 entity->acceleration_z = accelerationXYZ.z;
             }
-            if (JS_IsObject(velocity))
+            if (value["velocity"].type() == DukValue::Type::OBJECT)
             {
-                auto velocityXYZ = JSToCoordXYZ(ctx, velocity);
+                auto velocityXYZ = FromDuk<CoordsXYZ>(value["velocity"]);
                 entity->velocity_x = velocityXYZ.x;
                 entity->velocity_y = velocityXYZ.y;
                 entity->velocity_z = velocityXYZ.z;
             }
-            if (JS_IsNumber(timeToLive))
+            if (value["timeToLive"].type() == DukValue::Type::NUMBER)
             {
-                entity->time_to_live = JSToUint(ctx, timeToLive);
+                entity->time_to_live = value["timeToLive"].as_uint();
             }
-            if (JS_IsNumber(frame))
+            if (value["frame"].type() == DukValue::Type::NUMBER)
             {
-                entity->frame = std::clamp<uint16_t>(JSToUint(ctx, frame), 0, kCrashedVehicleParticleNumberSprites - 1)
+                entity->frame = std::clamp<uint16_t>(value["frame"].as_uint(), 0, kCrashedVehicleParticleNumberSprites - 1)
                     * kCrashedVehicleParticleFrameToSprite;
             }
-            if (JS_IsString(crashParticleType))
+            if (value["crashParticleType"].type() == DukValue::Type::STRING)
             {
-                auto key = JSToStdString(ctx, crashParticleType);
-                entity->crashed_sprite_base = CrashParticleTypeMap[key];
+                entity->crashed_sprite_base = CrashParticleTypeMap[value["crashParticleType"].as_string()];
             }
             entity->Invalidate();
-
-            JS_FreeValue(ctx, colours);
-            JS_FreeValue(ctx, acceleration);
-            JS_FreeValue(ctx, velocity);
-            JS_FreeValue(ctx, timeToLive);
-            JS_FreeValue(ctx, frame);
-            JS_FreeValue(ctx, crashParticleType);
         }
-        return JS_UNDEFINED;
     }
 
-    JSValue ScCrashedVehicleParticle::colours_get(JSContext* ctx, JSValue thisVal)
+    DukValue ScCrashedVehicleParticle::colours_get() const
     {
-        auto entity = GetCrashedVehicleParticle(thisVal);
+        auto ctx = GetContext()->GetScriptEngine().GetContext();
+        auto entity = GetCrashedVehicleParticle();
         if (entity != nullptr)
         {
-            JSValue obj = JS_NewObject(ctx);
-            JS_SetPropertyStr(ctx, obj, "body", JS_NewInt32(ctx, entity->colour[0]));
-            JS_SetPropertyStr(ctx, obj, "trim", JS_NewInt32(ctx, entity->colour[1]));
-            return obj;
+            DukObject dukColour(ctx);
+            dukColour.Set("body", entity->colour[0]);
+            dukColour.Set("trim", entity->colour[1]);
+            return dukColour.Take();
         }
-        return JS_NULL;
+        return ToDuk(ctx, nullptr);
     }
-    JSValue ScCrashedVehicleParticle::colours_set(JSContext* ctx, JSValue thisVal, JSValue jsValue)
+    void ScCrashedVehicleParticle::colours_set(const DukValue& value)
     {
-        JS_UNPACK_OBJECT(obj, ctx, jsValue);
-        JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
-        auto entity = GetCrashedVehicleParticle(thisVal);
+        auto entity = GetCrashedVehicleParticle();
         if (entity != nullptr)
         {
-            entity->colour[0] = JSToUint(ctx, obj, "body");
-            entity->colour[1] = JSToUint(ctx, obj, "trim");
+            auto colours = FromDuk<VehicleColour>(value);
+            entity->colour[0] = colours.Body;
+            entity->colour[1] = colours.Trim;
             entity->Invalidate();
         }
-        return JS_UNDEFINED;
     }
 }; // namespace OpenRCT2::Scripting
 

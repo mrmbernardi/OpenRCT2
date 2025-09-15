@@ -7,7 +7,7 @@
  * OpenRCT2 is licensed under the GNU General Public License version 3.
  *****************************************************************************/
 
-#ifdef ENABLE_SCRIPTING_REFACTOR
+#ifdef ENABLE_SCRIPTING
 
     #include "ScBalloon.hpp"
 
@@ -15,37 +15,40 @@
 
 namespace OpenRCT2::Scripting
 {
-    void ScBalloon::AddFuncs(JSContext* ctx, JSValue obj)
+    ScBalloon::ScBalloon(EntityId Id)
+        : ScEntity(Id)
     {
-        static constexpr JSCFunctionListEntry funcs[] = {
-            JS_CGETSET_DEF("colour", &ScBalloon::colour_get, &ScBalloon::colour_set)
-        };
-        JS_SetPropertyFunctionList(ctx, obj, funcs, std::size(funcs));
     }
 
-    Balloon* ScBalloon::GetBalloon(JSValue thisVal)
+    void ScBalloon::Register(duk_context* ctx)
     {
-        auto id = GetEntityId(thisVal);
-        return OpenRCT2::GetEntity<Balloon>(id);
+        dukglue_set_base_class<ScEntity, ScBalloon>(ctx);
+        dukglue_register_property(ctx, &ScBalloon::colour_get, &ScBalloon::colour_set, "colour");
     }
 
-    JSValue ScBalloon::colour_get(JSContext* ctx, JSValue thisVal)
+    Balloon* ScBalloon::GetBalloon() const
     {
-        auto balloon = GetBalloon(thisVal);
-        return JS_NewUint32(ctx, balloon == nullptr ? 0 : balloon->colour);
+        return OpenRCT2::GetEntity<Balloon>(_id);
     }
 
-    JSValue ScBalloon::colour_set(JSContext* ctx, JSValue thisVal, JSValue jsValue)
+    uint8_t ScBalloon::colour_get() const
     {
-        JS_UNPACK_UINT32(value, ctx, jsValue);
-        JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
-        auto balloon = GetBalloon(thisVal);
+        auto balloon = GetBalloon();
+        if (balloon != nullptr)
+        {
+            return balloon->colour;
+        }
+        return 0;
+    }
+
+    void ScBalloon::colour_set(uint8_t value)
+    {
+        auto balloon = GetBalloon();
         if (balloon != nullptr)
         {
             balloon->colour = value;
             balloon->Invalidate();
         }
-        return JS_UNDEFINED;
     }
 
 } // namespace OpenRCT2::Scripting

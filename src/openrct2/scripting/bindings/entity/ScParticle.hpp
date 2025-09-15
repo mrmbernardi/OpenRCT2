@@ -9,7 +9,7 @@
 
 #pragma once
 
-#ifdef ENABLE_SCRIPTING_REFACTOR
+#ifdef ENABLE_SCRIPTING
 
     #include "../../../entity/Particle.h"
     #include "../../../world/Location.hpp"
@@ -19,33 +19,35 @@
 
 namespace OpenRCT2::Scripting
 {
-    class ScCrashedVehicleParticle final : public ScEntity
+    class ScCrashedVehicleParticle : public ScEntity
     {
     public:
-        static void AddFuncs(JSContext* ctx, JSValue obj);
+        ScCrashedVehicleParticle(EntityId id);
+
+        static void Register(duk_context* ctx);
 
     private:
-        static VehicleCrashParticle* GetCrashedVehicleParticle(JSValue thisVal);
+        VehicleCrashParticle* GetCrashedVehicleParticle() const;
 
-        static JSValue colours_get(JSContext* ctx, JSValue thisVal);
-        static JSValue colours_set(JSContext* ctx, JSValue thisVal, JSValue value);
+        DukValue colours_get() const;
+        void colours_set(const DukValue& value);
 
-        static JSValue acceleration_get(JSContext* ctx, JSValue thisVal);
-        static JSValue acceleration_set(JSContext* ctx, JSValue thisVal, JSValue value);
+        DukValue acceleration_get() const;
+        void acceleration_set(const DukValue& value);
 
-        static JSValue velocity_get(JSContext* ctx, JSValue thisVal);
-        static JSValue velocity_set(JSContext* ctx, JSValue thisVal, JSValue value);
+        DukValue velocity_get() const;
+        void velocity_set(const DukValue& value);
 
-        static JSValue frame_get(JSContext* ctx, JSValue thisVal);
-        static JSValue frame_set(JSContext* ctx, JSValue thisVal, JSValue value);
+        uint8_t frame_get() const;
+        void frame_set(uint8_t value);
 
-        static JSValue crashedSpriteBase_get(JSContext* ctx, JSValue thisVal);
-        static JSValue crashedSpriteBase_set(JSContext* ctx, JSValue thisVal, JSValue value);
+        void crashedSpriteBase_set(const std::string& value);
+        std::string crashedSpriteBase_get() const;
 
-        static JSValue timeToLive_get(JSContext* ctx, JSValue thisVal);
-        static JSValue timeToLive_set(JSContext* ctx, JSValue thisVal, JSValue value);
+        void timeToLive_set(uint16_t value);
+        uint16_t timeToLive_get() const;
 
-        static JSValue Launch(JSContext* ctx, JSValue thisVal, int argc, JSValue* argv);
+        void Launch(const DukValue& value);
     };
 }; // namespace OpenRCT2::Scripting
 

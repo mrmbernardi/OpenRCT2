@@ -9,7 +9,7 @@
 
 #pragma once
 
-#ifdef ENABLE_SCRIPTING_REFACTOR
+#ifdef ENABLE_SCRIPTING
 
     #include "ScEntity.hpp"
 
@@ -17,16 +17,19 @@ struct Balloon;
 
 namespace OpenRCT2::Scripting
 {
-    class ScBalloon final : public ScEntity
+
+    class ScBalloon : public ScEntity
     {
     public:
-        static void AddFuncs(JSContext* ctx, JSValue obj);
+        ScBalloon(EntityId Id);
+
+        static void Register(duk_context* ctx);
 
     private:
-        static Balloon* GetBalloon(JSValue thisVal);
+        Balloon* GetBalloon() const;
 
-        static JSValue colour_get(JSContext* ctx, JSValue thisVal);
-        static JSValue colour_set(JSContext* ctx, JSValue thisVal, JSValue value);
+        uint8_t colour_get() const;
+        void colour_set(uint8_t);
     };
 } // namespace OpenRCT2::Scripting
 #endif

@@ -168,22 +168,6 @@ namespace OpenRCT2::Scripting
         return output;
     }
 
-    inline std::optional<uint32_t> JSToOptionalUint(JSContext* ctx, JSValue obj, const char* property)
-    {
-        JSValue val = JS_GetPropertyStr(ctx, obj, property);
-        std::optional<uint32_t> output = std::nullopt;
-        if (JS_IsNumber(val))
-        {
-            uint32_t uintVal = 0;
-            if (JS_ToUint32(ctx, &uintVal, val) >= 0)
-            {
-                output = std::make_optional(uintVal);
-            }
-        }
-        JS_FreeValue(ctx, val);
-        return output;
-    }
-
     inline bool AsOrDefault(JSContext* ctx, JSValue obj, const char* property, bool def)
     {
         JSValue val = JS_GetPropertyStr(ctx, obj, property);
@@ -210,22 +194,6 @@ namespace OpenRCT2::Scripting
             output = def;
         }
         else if (JS_ToInt32(ctx, &output, val) < 0)
-        {
-            output = def;
-        }
-        JS_FreeValue(ctx, val);
-        return output;
-    }
-
-    inline uint32_t AsOrDefault(JSContext* ctx, JSValue obj, const char* property, uint32_t def)
-    {
-        JSValue val = JS_GetPropertyStr(ctx, obj, property);
-        uint32_t output;
-        if (!JS_IsNumber(val))
-        {
-            output = def;
-        }
-        else if (JS_ToUint32(ctx, &output, val) < 0)
         {
             output = def;
         }
@@ -310,49 +278,6 @@ namespace OpenRCT2::Scripting
         return output;
     }
 
-    inline uint32_t JSToUint(JSContext* ctx, JSValue val)
-    {
-        uint32_t output = 0;
-        if (JS_IsNumber(val))
-        {
-            JS_ToUint32(ctx, &output, val);
-        }
-        return output;
-    }
-
-    inline uint32_t JSToUint(JSContext* ctx, JSValue obj, const char* property)
-    {
-        JSValue val = JS_GetPropertyStr(ctx, obj, property);
-        uint32_t output = JSToUint(ctx, val);
-        JS_FreeValue(ctx, val);
-        return output;
-    }
-
-    inline CoordsXY JSToCoordXY(JSContext* ctx, JSValue obj)
-    {
-        return {
-            JSToInt(ctx, obj, "x"),
-            JSToInt(ctx, obj, "y")
-        };
-    }
-    
-    inline CoordsXY JSToCoordXY(JSContext* ctx, JSValue obj, const char* property)
-    {
-        JSValue val = JS_GetPropertyStr(ctx, obj, property);
-        CoordsXY output = JSToCoordXY(ctx, val);
-        JS_FreeValue(ctx, val);
-        return output;
-    }
-
-    inline CoordsXYZ JSToCoordXYZ(JSContext* ctx, JSValue obj)
-    {
-        return {
-            JSToInt(ctx, obj, "x"),
-            JSToInt(ctx, obj, "y"),
-            JSToInt(ctx, obj, "z")
-        };
-    }
-
     inline JSValue ToJSValue(JSContext* ctx, uint8_t val)
     {
         return JS_NewInt32(ctx, val);
@@ -429,18 +354,6 @@ namespace OpenRCT2::Scripting
             return JS_EXCEPTION;                                                                                               \
         }
 
-    #define JS_UNPACK_INT64(var, ctx, val)                                                                                     \
-        int64_t var;                                                                                                           \
-        if (!JS_IsNumber(val))                                                                                                 \
-        {                                                                                                                      \
-            JS_ThrowTypeError(ctx, "Expected number");                                                                         \
-            return JS_EXCEPTION;                                                                                               \
-        }                                                                                                                      \
-        if (JS_ToInt64(ctx, &var, val) < 0)                                                                                    \
-        {                                                                                                                      \
-            return JS_EXCEPTION;                                                                                               \
-        }
-
     #define JS_UNPACK_UINT32(var, ctx, val)                                                                                    \
         uint32_t var;                                                                                                          \
         if (!JS_IsNumber(val))                                                                                                 \
@@ -449,19 +362,6 @@ namespace OpenRCT2::Scripting
             return JS_EXCEPTION;                                                                                               \
         }                                                                                                                      \
         if (JS_ToUint32(ctx, &var, val) < 0)                                                                                   \
-        {                                                                                                                      \
-            return JS_EXCEPTION;                                                                                               \
-        }
-
-
-    #define JS_UNPACK_MONEY64(var, ctx, val)                                                                                   \
-        money64 var;                                                                                                           \
-        if (!JS_IsNumber(val))                                                                                                 \
-        {                                                                                                                      \
-            JS_ThrowTypeError(ctx, "Expected number");                                                                         \
-            return JS_EXCEPTION;                                                                                               \
-        }                                                                                                                      \
-        if (JS_ToInt64(ctx, &var, val) < 0)                                                                                    \
         {                                                                                                                      \
             return JS_EXCEPTION;                                                                                               \
         }
@@ -494,7 +394,7 @@ namespace OpenRCT2::Scripting
             return JS_EXCEPTION;                                                                                               \
         }                                                                                                                      \
         {                                                                                                                      \
-            const int result = JS_ToBool(ctx, val);                                                                            \
+            const int result = JS_ToBool(ctx, value);                                                                          \
             if (result == -1)                                                                                                  \
             {                                                                                                                  \
                 return JS_EXCEPTION;                                                                                           \
