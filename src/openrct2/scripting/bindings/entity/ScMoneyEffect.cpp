@@ -7,7 +7,7 @@
  * OpenRCT2 is licensed under the GNU General Public License version 3.
  *****************************************************************************/
 
-#ifdef ENABLE_SCRIPTING
+#ifdef ENABLE_SCRIPTING_REFACTOR
 
     #include "ScMoneyEffect.hpp"
 
@@ -15,41 +15,37 @@
 
 namespace OpenRCT2::Scripting
 {
-    ScMoneyEffect::ScMoneyEffect(EntityId Id)
-        : ScEntity(Id)
+    void ScMoneyEffect::AddFuncs(JSContext* ctx, JSValue obj)
     {
+        static constexpr JSCFunctionListEntry funcs[] = {
+            JS_CGETSET_DEF("value", &ScMoneyEffect::value_get, &ScMoneyEffect::value_set)
+        };
+        JS_SetPropertyFunctionList(ctx, obj, funcs, std::size(funcs));
     }
 
-    void ScMoneyEffect::Register(duk_context* ctx)
+    MoneyEffect* ScMoneyEffect::GetMoneyEffect(JSValue thisVal)
     {
-        dukglue_set_base_class<ScEntity, ScMoneyEffect>(ctx);
-        dukglue_register_property(ctx, &ScMoneyEffect::value_get, &ScMoneyEffect::value_set, "value");
+        auto id = GetEntityId(thisVal);
+        return OpenRCT2::GetEntity<MoneyEffect>(id);
     }
 
-    MoneyEffect* ScMoneyEffect::GetMoneyEffect() const
+    JSValue ScMoneyEffect::value_get(JSContext* ctx, JSValue thisVal)
     {
-        return OpenRCT2::GetEntity<MoneyEffect>(_id);
+        auto moneyEffect = GetMoneyEffect(thisVal);
+        return JS_NewUint32(ctx, moneyEffect == nullptr ? 0 : moneyEffect->Value);
     }
 
-    money64 ScMoneyEffect::value_get() const
+    JSValue ScMoneyEffect::value_set(JSContext* ctx, JSValue thisVal, JSValue jsValue)
     {
-        auto moneyEffect = GetMoneyEffect();
-        if (moneyEffect != nullptr)
-        {
-            return moneyEffect->Value;
-        }
-        return 0;
-    }
-
-    void ScMoneyEffect::value_set(money64 value)
-    {
-        auto moneyEffect = GetMoneyEffect();
+        JS_UNPACK_MONEY64(value, ctx, jsValue);
+        JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
+        auto moneyEffect = GetMoneyEffect(thisVal);
         if (moneyEffect != nullptr)
         {
             moneyEffect->SetValue(value);
         }
+        return JS_UNDEFINED;
     }
-
 } // namespace OpenRCT2::Scripting
 
 #endif

@@ -454,6 +454,9 @@ ScConsole Scripting::gScConsole;
 ScContext Scripting::gScContext;
 ScDisposable Scripting::gScDisposable;
 ScNetwork Scripting::gScNetwork;
+ScEntity Scripting::gScEntity;
+ScThought Scripting::gScThought;
+ScPatrolArea Scripting::gScPatrolArea;
 
 void ScriptEngine::RegisterClasses(JSContext* ctx)
 {
@@ -494,22 +497,20 @@ void ScriptEngine::RegisterClasses(JSContext* ctx)
     // ScTileElement::Register(ctx);
     // ScTrackIterator::Register(ctx);
     // ScTrackSegment::Register(ctx);
-    // ScEntity::Register(ctx);
-    // ScLitter::Register(ctx);
-    // ScBalloon::Register(ctx);
+    gScEntity.Register(ctx);
     // ScMoneyEffect::Register(ctx);
     // ScVehicle::Register(ctx);
     // ScCrashedVehicleParticle::Register(ctx);
     // ScPeep::Register(ctx);
     // ScGuest::Register(ctx);
-    // ScThought::Register(ctx);
+    gScThought.Register(ctx);
     // #ifndef DISABLE_NETWORK
     // ScSocket::Register(ctx);
     // ScListener::Register(ctx);
     // #endif
     // ScScenario::Register(ctx);
     // ScScenarioObjective::Register(ctx);
-    // ScPatrolArea::Register(ctx);
+    gScPatrolArea.Register(ctx);
     // ScStaff::Register(ctx);
     // ScHandyman::Register(ctx);
     // ScMechanic::Register(ctx);
