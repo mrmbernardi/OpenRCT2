@@ -71,7 +71,7 @@ namespace OpenRCT2::Ui::Windows
 
     static void InvokeCustomToolboxMenuItem(size_t index)
     {
-#ifdef ENABLE_SCRIPTING
+#ifdef ENABLE_SCRIPTING_REFACTOR
         const auto& customMenuItems = Scripting::CustomMenuItems;
         size_t i = 0;
         for (const auto& item : customMenuItems)
@@ -187,7 +187,7 @@ namespace OpenRCT2::Ui::Windows
                 gDropdown.items[i++] = Dropdown::PlainMenuLabel(STR_TRACK_DESIGNS_MANAGER);
                 gDropdown.items[i++] = Dropdown::PlainMenuLabel(STR_OPEN_USER_CONTENT_FOLDER);
 
-#ifdef ENABLE_SCRIPTING
+#ifdef ENABLE_SCRIPTING_REFACTOR
                 auto hasCustomItems = false;
                 const auto& customMenuItems = Scripting::CustomMenuItems;
                 if (!customMenuItems.empty())

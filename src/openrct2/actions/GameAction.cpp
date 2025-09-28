@@ -11,7 +11,6 @@
 
 #include "../Context.h"
 #include "../core/Guard.hpp"
-#include "../scripting/Duktape.hpp"
 #include "../scripting/HookEngine.h"
 #include "../scripting/ScriptEngine.h"
 #include "../world/Map.h"
