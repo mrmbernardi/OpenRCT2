@@ -32,7 +32,7 @@ namespace OpenRCT2::Scripting
                 if (it != all.end())
                 {
                     auto value = static_cast<uint64_t>(std::distance(all.begin(), it));
-                    JS_SetPropertyInt64(ctx, functionArray, index++, JS_NewBigUint64(ctx, value));
+                    JS_SetPropertyInt64(ctx, functionArray, index++, JS_NewInt64(ctx, value));
                 }
             }
             return functionArray;
@@ -47,14 +47,13 @@ namespace OpenRCT2::Scripting
             {
                 JSValue val = JS_NewObject(ctx);
                 JS_SetPropertyStr(ctx, val, "name", JSFromStdString(ctx, f->GetName()));
-                JS_SetPropertyStr(ctx, val, "callCount", JS_NewBigUint64(ctx, f->GetCallCount()));
+                JS_SetPropertyStr(ctx, val, "callCount", JS_NewInt64(ctx, f->GetCallCount()));
                 JS_SetPropertyStr(ctx, val, "minTime", JS_NewFloat64(ctx, f->GetMinTime()));
                 JS_SetPropertyStr(ctx, val, "maxTime", JS_NewFloat64(ctx, f->GetMaxTime()));
                 JS_SetPropertyStr(ctx, val, "totalTime", JS_NewFloat64(ctx, f->getTotalTime()));
                 JS_SetPropertyStr(ctx, val, "parents", GetFunctionIndexArray(ctx, data, f->GetParents()));
                 JS_SetPropertyStr(ctx, val, "children", GetFunctionIndexArray(ctx, data, f->GetChildren()));
                 JS_SetPropertyInt64(ctx, profileData, index++, val);
-                index++;
             }
             return profileData;
         }
