@@ -486,6 +486,7 @@ ScTileElement Scripting::gScTileElement;
 ScEntity Scripting::gScEntity;
 ScThought Scripting::gScThought;
 ScPatrolArea Scripting::gScPatrolArea;
+ScPlugin Scripting::gScPlugin;
 
 void ScriptEngine::RegisterClasses(JSContext* ctx)
 {
@@ -527,7 +528,7 @@ void ScriptEngine::RegisterClasses(JSContext* ctx)
     // ScScenario::Register(ctx);
     // ScScenarioObjective::Register(ctx);
     gScPatrolArea.Register(ctx);
-    // ScPlugin::Register(ctx);
+    gScPlugin.Register(ctx);
 }
 
 JSContext* ScriptEngine::CreateContext() const
@@ -562,7 +563,7 @@ void ScriptEngine::InitialiseContext(JSContext* ctx) const
     JS_SetPropertyStr(ctx, glb, "map", gScMap.New(ctx));
     JS_SetPropertyStr(ctx, glb, "network", gScNetwork.New(ctx));
     JS_SetPropertyStr(ctx, glb, "park", gScPark.New(ctx));
-    // dukglue_register_global(ctx, std::make_shared<ScPlugin>(), "pluginManager");
+    JS_SetPropertyStr(ctx, glb, "pluginManager", gScPlugin.New(ctx));
     JS_SetPropertyStr(ctx, glb, "profiler", gScProfiler.New(ctx));
     // dukglue_register_global(ctx, std::make_shared<ScScenario>(), "scenario");
     JS_SetPropertyStr(ctx, glb, "objectManager", gScObjectManager.New(ctx));
