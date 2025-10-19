@@ -49,7 +49,7 @@ namespace OpenRCT2::Scripting
 
         static JSValue sharedStorage_get(JSContext* ctx, JSValue thisVal)
         {
-            throw std::runtime_error("not implemented."); // this requires support in ScriptEngine.cpp
+            return JS_ThrowPlainError(ctx, "not implemented."); // this requires support in ScriptEngine.cpp
             /* TODO (mber)
             auto& scriptEngine = GetContext()->GetScriptEngine();
             return std::make_shared<ScConfiguration>(ScConfigurationKind::Shared, scriptEngine.GetSharedStorage());
@@ -82,7 +82,7 @@ namespace OpenRCT2::Scripting
 
         static JSValue getParkStorage(JSContext* ctx, JSValue thisVal, int argc, JSValue* argv)
         {
-            throw std::runtime_error("not implemented."); // this requires support in ScriptEngine.cpp
+            return JS_ThrowPlainError(ctx, "not implemented."); // this requires support in ScriptEngine.cpp
             /* TODO (mber) // dukPluginName is argv[0]
             auto& scriptEngine = GetContext()->GetScriptEngine();
 
