@@ -359,37 +359,28 @@ namespace OpenRCT2::Scripting
 
     JSValue ScPark::messages_get(JSContext* ctx, JSValue thisVal)
     {
-        // TODO (mber) pending ScParkMessage conversion
-        JS_ThrowInternalError(ctx, "not implemented yet");
-        return JS_EXCEPTION;
-        /*
-        std::vector<std::shared_ptr<ScParkMessage>> result;
+        JSValue result = JS_NewArray(ctx);
         auto& gameState = getGameState();
         for (size_t i = 0, newsSize = gameState.newsItems.GetRecent().size(); i < newsSize; i++)
         {
-            result.push_back(std::make_shared<ScParkMessage>(i));
+            JS_SetPropertyInt64(ctx, result, i, gScParkMessage.New(ctx, i));
         }
         for (size_t i = 0, newsSize = gameState.newsItems.GetArchived().size(); i < newsSize; i++)
         {
-            result.push_back(std::make_shared<ScParkMessage>(i + News::ItemHistoryStart));
+            auto offset = i + News::ItemHistoryStart;
+            JS_SetPropertyInt64(ctx, result, offset, gScParkMessage.New(ctx, offset));
         }
         return result;
-        */
     }
 
     JSValue ScPark::messages_set(JSContext* ctx, JSValue thisVal, JSValue value)
     {
-        // TODO (mber) pending ScParkMessage conversion
-        JS_ThrowInternalError(ctx, "not implemented yet");
-        return JS_EXCEPTION;
-        /*
         int32_t index = 0;
         int32_t archiveIndex = News::ItemHistoryStart;
         auto& gameState = getGameState();
-        for (const auto& item : value)
-        {
-            auto isArchived = item["isArchived"].as_bool();
-            auto newsItem = FromDuk<News::Item>(item);
+        JSIterateArray(ctx, value, [&index, &archiveIndex, &gameState](JSContext* ctx, JSValue item) {
+            auto isArchived = AsOrDefault(ctx, item, "isArchived", false);
+            auto newsItem = NewsItemFromJS(ctx, item);
             if (isArchived)
             {
                 if (archiveIndex < News::MaxItems)
@@ -406,7 +397,7 @@ namespace OpenRCT2::Scripting
                     index++;
                 }
             }
-        }
+        });
 
         // End the lists by setting next item to null
         if (index < News::ItemHistoryStart)
@@ -417,47 +408,35 @@ namespace OpenRCT2::Scripting
         {
             gameState.newsItems[archiveIndex].type = News::ItemType::null;
         }
-        */
+        return JS_UNDEFINED;
     }
 
     JSValue ScPark::postMessage(JSContext* ctx, JSValue thisVal, int argc, JSValue* argv)
     {
-        // TODO (mber) pending ScParkMessage conversion as we use some functions from the file.
-        JS_ThrowInternalError(ctx, "not implemented yet");
-        return JS_EXCEPTION;
-        /*
-        ThrowIfGameStateNotMutable();
-        try
+        uint32_t assoc = std::numeric_limits<uint32_t>::max();
+        auto type = News::ItemType::blank;
+        std::string text;
+        if (JS_IsString(thisVal))
         {
-            uint32_t assoc = std::numeric_limits<uint32_t>::max();
-            auto type = News::ItemType::blank;
-            std::string text;
-            if (message.type() == DukValue::Type::STRING)
+            text = JSToStdString(ctx, thisVal);
+        }
+        else
+        {
+            type = GetParkMessageType(JSToStdString(ctx, thisVal, "type"));
+            text = JSToStdString(ctx, thisVal, "text");
+            if (type == News::ItemType::blank)
             {
-                text = message.as_string();
+                assoc = static_cast<uint32_t>(((kCoordsNull & 0xFFFF) << 16) | (kCoordsNull & 0xFFFF));
             }
-            else
-            {
-                type = GetParkMessageType(message["type"].as_string());
-                text = message["text"].as_string();
-                if (type == News::ItemType::blank)
-                {
-                    assoc = static_cast<uint32_t>(((kCoordsNull & 0xFFFF) << 16) | (kCoordsNull & 0xFFFF));
-                }
 
-                auto dukSubject = message["subject"];
-                if (dukSubject.type() == DukValue::Type::NUMBER)
-                {
-                    assoc = static_cast<uint32_t>(dukSubject.as_uint());
-                }
+            auto subject = JS_GetPropertyStr(ctx, thisVal, "subject");
+            if (JS_IsNumber(subject))
+            {
+                assoc = JSToUint(ctx, subject);
             }
-            News::AddItemToQueue(type, text.c_str(), assoc);
         }
-        catch (const DukException&)
-        {
-            duk_error(message.context(), DUK_ERR_ERROR, "Invalid message argument.");
-        }
-        */
+        News::AddItemToQueue(type, text.c_str(), assoc);
+        return JS_UNDEFINED;
     }
 
     JSValue ScPark::getMonthlyExpenditure(JSContext* ctx, JSValue thisVal, int argc, JSValue* argv)
