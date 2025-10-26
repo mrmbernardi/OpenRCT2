@@ -52,6 +52,7 @@ namespace OpenRCT2::Scripting
         static JSValue type_set(JSContext* ctx, JSValue, JSValue jsValue)
         {
             JS_UNPACK_STR(value, ctx, jsValue);
+            JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
             getGameState().scenarioOptions.objective.Type = ScenarioObjectiveTypeMap[value];
             return JS_UNDEFINED;
         }
@@ -70,6 +71,7 @@ namespace OpenRCT2::Scripting
         static JSValue guests_set(JSContext* ctx, JSValue, JSValue jsValue)
         {
             JS_UNPACK_UINT32(value, ctx, jsValue);
+            JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
             auto& gameState = OpenRCT2::getGameState();
             if (gameState.scenarioOptions.objective.Type == ObjectiveType::guestsBy
                 || gameState.scenarioOptions.objective.Type == ObjectiveType::guestsAndRating)
@@ -93,6 +95,7 @@ namespace OpenRCT2::Scripting
         static JSValue year_set(JSContext* ctx, JSValue, JSValue jsValue)
         {
             JS_UNPACK_UINT32(value, ctx, jsValue);
+            JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
             auto& gameState = OpenRCT2::getGameState();
             if (gameState.scenarioOptions.objective.Type == ObjectiveType::guestsBy
                 || gameState.scenarioOptions.objective.Type == ObjectiveType::parkValueBy)
@@ -115,6 +118,7 @@ namespace OpenRCT2::Scripting
         static JSValue length_set(JSContext* ctx, JSValue, JSValue jsValue)
         {
             JS_UNPACK_UINT32(value, ctx, jsValue);
+            JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
             auto& gameState = OpenRCT2::getGameState();
             if (gameState.scenarioOptions.objective.Type == ObjectiveType::tenRollercoastersLength)
             {
@@ -136,6 +140,7 @@ namespace OpenRCT2::Scripting
         static JSValue excitement_set(JSContext* ctx, JSValue, JSValue jsValue)
         {
             JS_UNPACK_INT64(value, ctx, jsValue);
+            JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
             auto& gameState = OpenRCT2::getGameState();
             if (gameState.scenarioOptions.objective.Type == ObjectiveType::finishFiveRollercoasters)
             {
@@ -158,6 +163,7 @@ namespace OpenRCT2::Scripting
         static JSValue parkValue_set(JSContext* ctx, JSValue, JSValue jsValue)
         {
             JS_UNPACK_INT64(value, ctx, jsValue);
+            JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
             auto& gameState = OpenRCT2::getGameState();
             if (gameState.scenarioOptions.objective.Type == ObjectiveType::parkValueBy
                 || gameState.scenarioOptions.objective.Type == ObjectiveType::repayLoanAndParkValue)
@@ -181,6 +187,7 @@ namespace OpenRCT2::Scripting
         static JSValue monthlyIncome_set(JSContext* ctx, JSValue, JSValue jsValue)
         {
             JS_UNPACK_INT64(value, ctx, jsValue);
+            JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
             auto& gameState = OpenRCT2::getGameState();
             if (gameState.scenarioOptions.objective.Type == ObjectiveType::parkValueBy
                 || gameState.scenarioOptions.objective.Type == ObjectiveType::repayLoanAndParkValue)
@@ -224,6 +231,7 @@ namespace OpenRCT2::Scripting
         static JSValue name_set(JSContext* ctx, JSValue, JSValue jsValue)
         {
             JS_UNPACK_STR(value, ctx, jsValue);
+            JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
             getGameState().scenarioOptions.name = value;
             return JS_UNDEFINED;
         }
@@ -236,6 +244,7 @@ namespace OpenRCT2::Scripting
         static JSValue details_set(JSContext* ctx, JSValue, JSValue jsValue)
         {
             JS_UNPACK_STR(value, ctx, jsValue);
+            JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
             getGameState().scenarioOptions.details = value;
             return JS_UNDEFINED;
         }
@@ -248,6 +257,7 @@ namespace OpenRCT2::Scripting
         static JSValue completedBy_set(JSContext* ctx, JSValue, JSValue jsValue)
         {
             JS_UNPACK_STR(value, ctx, jsValue);
+            JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
             getGameState().scenarioCompletedBy = value;
             return JS_UNDEFINED;
         }
@@ -260,6 +270,7 @@ namespace OpenRCT2::Scripting
         static JSValue filename_set(JSContext* ctx, JSValue, JSValue jsValue)
         {
             JS_UNPACK_STR(value, ctx, jsValue);
+            JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
             getGameState().scenarioFileName = value;
             return JS_UNDEFINED;
         }
@@ -277,6 +288,7 @@ namespace OpenRCT2::Scripting
         static JSValue parkRatingWarningDays_set(JSContext* ctx, JSValue, JSValue jsValue)
         {
             JS_UNPACK_UINT32(value, ctx, jsValue);
+            JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
             getGameState().scenarioParkRatingWarningDays = value;
             return JS_UNDEFINED;
         }
@@ -294,6 +306,7 @@ namespace OpenRCT2::Scripting
         static JSValue completedCompanyValue_set(JSContext* ctx, JSValue, JSValue jsValue)
         {
             JS_UNPACK_INT32(value, ctx, jsValue);
+            JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
             getGameState().scenarioCompletedCompanyValue = value;
             return JS_UNDEFINED;
         }
@@ -310,6 +323,7 @@ namespace OpenRCT2::Scripting
         static JSValue status_set(JSContext* ctx, JSValue, JSValue jsValue)
         {
             JS_UNPACK_STR(value, ctx, jsValue);
+            JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
             auto& gameState = getGameState();
             if (value == "inProgress")
                 gameState.scenarioCompletedCompanyValue = kMoney64Undefined;
@@ -327,6 +341,7 @@ namespace OpenRCT2::Scripting
         static JSValue companyValueRecord_set(JSContext* ctx, JSValue, JSValue jsValue)
         {
             JS_UNPACK_MONEY64(value, ctx, jsValue);
+            JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
             getGameState().scenarioCompanyValueRecord = value;
             return JS_UNDEFINED;
         }
