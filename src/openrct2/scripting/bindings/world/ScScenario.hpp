@@ -299,7 +299,7 @@ namespace OpenRCT2::Scripting
             if (gameState.scenarioCompletedCompanyValue == kMoney64Undefined
                 || gameState.scenarioCompletedCompanyValue == kCompanyValueOnFailedObjective)
             {
-                return JS_UNDEFINED;
+                return JS_NULL;
             }
             return JS_NewInt64(ctx, gameState.scenarioCompletedCompanyValue);
         }
