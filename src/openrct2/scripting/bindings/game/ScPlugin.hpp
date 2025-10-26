@@ -48,15 +48,16 @@ namespace OpenRCT2::Scripting
                 // Create object using context
                 JSValue val = JS_NewObject(ctx);
                 // Name and Version
-                JS_SetPropertyStr(ctx, val, "name", JSFromStdString(ctx, metadata.Name.c_str()));
-                JS_SetPropertyStr(ctx, val, "version", JSFromStdString(ctx, metadata.Version.c_str()));
+                JS_SetPropertyStr(ctx, val, "name", JSFromStdString(ctx, metadata.Name));
+                JS_SetPropertyStr(ctx, val, "version", JSFromStdString(ctx, metadata.Version));
                 // Authors
                 JSValue authorsArray = JS_NewArray(ctx);
-                for (auto [s, idx] = std::tuple{ metadata.Authors.begin(), 0 }; s != metadata.Authors.end(); s++, idx++)
+
+                int64_t idx = 0;
+                for (auto& str : metadata.Authors)
                 {
-                    auto& str = *s;
-                    JSValue authorStr = JSFromStdString(ctx, str.c_str());
-                    JS_SetPropertyUint32(ctx, authorsArray, idx, authorStr);
+                    JSValue authorStr = JSFromStdString(ctx, str);
+                    JS_SetPropertyInt64(ctx, authorsArray, idx++, authorStr);
                 }
                 JS_SetPropertyStr(ctx, val, "authors", authorsArray);
                 JS_SetPropertyInt64(ctx, formattedMetadata, index++, val);
