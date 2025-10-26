@@ -104,7 +104,7 @@ namespace OpenRCT2::Scripting
             auto& objManager = OpenRCT2::GetContext()->GetObjectManager();
             auto* climateObj = objManager.GetLoadedObject<ClimateObject>(0);
             if (climateObj == nullptr)
-                return JS_UNDEFINED;
+                return JS_NewString(ctx, {});
 
             return JS_NewString(ctx, climateObj->getScriptName().c_str());
         }
