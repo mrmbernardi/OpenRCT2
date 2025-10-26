@@ -225,7 +225,7 @@ namespace OpenRCT2::Scripting
     private:
         static JSValue name_get(JSContext* ctx, JSValue)
         {
-            return JS_NewString(ctx, getGameState().scenarioOptions.name.c_str());
+            return JSFromStdString(ctx, getGameState().scenarioOptions.name);
         }
 
         static JSValue name_set(JSContext* ctx, JSValue, JSValue jsValue)
@@ -238,7 +238,7 @@ namespace OpenRCT2::Scripting
 
         static JSValue details_get(JSContext* ctx, JSValue)
         {
-            return JS_NewString(ctx, getGameState().scenarioOptions.details.c_str());
+            return JSFromStdString(ctx, getGameState().scenarioOptions.details);
         }
 
         static JSValue details_set(JSContext* ctx, JSValue, JSValue jsValue)
