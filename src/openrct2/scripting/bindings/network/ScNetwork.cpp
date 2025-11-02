@@ -82,9 +82,8 @@ namespace OpenRCT2::Scripting
         auto numGroups = Network::GetNumGroups();
         for (int32_t i = 0; i < numGroups; i++)
         {
-            // TODO (mber)
-            // auto groupId = Network::GetGroupID(i);
-            // groups.push_back(std::make_shared<ScPlayerGroup>(groupId));
+            auto groupId = Network::GetGroupID(i);
+            JS_SetPropertyInt64(ctx, groups, i, gScPlayerGroup.New(ctx, groupId));
         }
     #endif
         return groups;
@@ -97,9 +96,8 @@ namespace OpenRCT2::Scripting
         auto numPlayers = Network::GetNumPlayers();
         for (int32_t i = 0; i < numPlayers; i++)
         {
-            // TODO (mber)
-            // auto playerId = Network::GetPlayerID(i);
-            // players.push_back(std::make_shared<ScPlayer>(playerId));
+            auto playerId = Network::GetPlayerID(i);
+            JS_SetPropertyInt64(ctx, players, i, gScPlayer.New(ctx, playerId));
         }
     #endif
         return players;
@@ -107,23 +105,16 @@ namespace OpenRCT2::Scripting
 
     JSValue ScNetwork::currentPlayer_get(JSContext* ctx, JSValue thisVal)
     {
-        // TODO (mber)
-        JS_ThrowInternalError(ctx, "not implemented");
-        return JS_EXCEPTION;
-        /*
-        std::shared_ptr<ScPlayer> player;
     #ifndef DISABLE_NETWORK
         auto playerId = Network::GetCurrentPlayerId();
-        player = std::make_shared<ScPlayer>(playerId);
+        return gScPlayer.New(ctx, playerId);
+    #else
+        return JS_NULL;
     #endif
-        return player;
-        */
     }
 
     JSValue ScNetwork::getPlayer(JSContext* ctx, JSValue thisVal, int argc, JSValue* argv)
     {
-        // TODO (mber)
-        /*
     #ifndef DISABLE_NETWORK
         JS_UNPACK_INT32(id, ctx, argv[0]);
         if (GetTargetAPIVersion() < kApiVersionNetworkIDs)
@@ -133,7 +124,7 @@ namespace OpenRCT2::Scripting
             if (index < numPlayers)
             {
                 auto playerId = Network::GetPlayerID(index);
-                return std::make_shared<ScPlayer>(playerId);
+                return gScPlayer.New(ctx, playerId);
             }
         }
         else
@@ -141,12 +132,10 @@ namespace OpenRCT2::Scripting
             auto index = Network::GetPlayerIndex(id);
             if (index != -1)
             {
-                return std::make_shared<ScPlayer>(id);
+                return gScPlayer.New(ctx, id);
             }
         }
-
     #endif
-    */
         return JS_NULL;
     }
 
@@ -192,11 +181,8 @@ namespace OpenRCT2::Scripting
             auto numGroups = Network::GetNumGroups();
             if (index < numGroups)
             {
-                // TODO (mber)
-                /*
                 auto groupId = Network::GetGroupID(index);
-                return std::make_shared<ScPlayerGroup>(groupId);
-                */
+                return gScPlayerGroup.New(ctx, groupId);
             }
         }
         else
@@ -204,10 +190,7 @@ namespace OpenRCT2::Scripting
             auto index = Network::GetGroupIndex(id);
             if (index != -1)
             {
-                // TODO (mber)
-                /*
-                return std::make_shared<ScPlayerGroup>(id);
-                */
+                return gScPlayerGroup.New(ctx, id);
             }
         }
     #endif
@@ -328,10 +311,9 @@ namespace OpenRCT2::Scripting
         */
     }
     #else
-    void ScNetwork::createListener(JSContext* ctx, JSValue thisVal, int argc, JSValue* argv)
+    JSValue ScNetwork::createListener(JSContext* ctx, JSValue thisVal, int argc, JSValue* argv)
     {
-        JS_ThrowPlainError(ctx, "Networking has been disabled.");
-        return JS_EXCEPTION;
+        return JS_ThrowPlainError(ctx, "Networking has been disabled.");
     }
     #endif
 
@@ -349,10 +331,9 @@ namespace OpenRCT2::Scripting
         */
     }
     #else
-    void ScNetwork::createSocket(JSContext* ctx, JSValue thisVal, int argc, JSValue* argv)
+    JSValue ScNetwork::createSocket(JSContext* ctx, JSValue thisVal, int argc, JSValue* argv)
     {
-        JS_ThrowPlainError(ctx, "Networking has been disabled.");
-        return JS_EXCEPTION;
+        return JS_ThrowPlainError(ctx, "Networking has been disabled.");
     }
     #endif
 
