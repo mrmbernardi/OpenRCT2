@@ -52,10 +52,12 @@ namespace OpenRCT2::Scripting
 
     JSValue ScParkMessage::month_set(JSContext* ctx, JSValue thisVal, JSValue jsValue)
     {
+        JS_UNPACK_UINT32(value, ctx, jsValue);
+        JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
+
         auto msg = GetMessage(thisVal);
         if (msg != nullptr)
         {
-            JS_UNPACK_UINT32(value, ctx, jsValue);
             msg->monthYear = static_cast<uint16_t>(value);
         }
         return JS_UNDEFINED;
@@ -73,10 +75,12 @@ namespace OpenRCT2::Scripting
 
     JSValue ScParkMessage::day_set(JSContext* ctx, JSValue thisVal, JSValue jsValue)
     {
+        JS_UNPACK_UINT32(value, ctx, jsValue);
+        JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
+
         auto msg = GetMessage(thisVal);
         if (msg != nullptr)
         {
-            JS_UNPACK_UINT32(value, ctx, jsValue);
             msg->day = static_cast<uint8_t>(value);
         }
         return JS_UNDEFINED;
@@ -94,10 +98,12 @@ namespace OpenRCT2::Scripting
 
     JSValue ScParkMessage::tickCount_set(JSContext* ctx, JSValue thisVal, JSValue jsValue)
     {
+        JS_UNPACK_UINT32(value, ctx, jsValue);
+        JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
+
         auto msg = GetMessage(thisVal);
         if (msg != nullptr)
         {
-            JS_UNPACK_UINT32(value, ctx, jsValue);
             msg->ticks = static_cast<uint16_t>(value);
         }
         return JS_UNDEFINED;
@@ -110,15 +116,17 @@ namespace OpenRCT2::Scripting
         {
             return JSFromStdString(ctx, GetParkMessageType(msg->type));
         }
-        return JS_UNDEFINED;
+        return JSFromStdString(ctx, {});
     }
 
     JSValue ScParkMessage::type_set(JSContext* ctx, JSValue thisVal, JSValue jsValue)
     {
+        JS_UNPACK_STR(value, ctx, jsValue);
+        JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
+
         auto msg = GetMessage(thisVal);
         if (msg != nullptr)
         {
-            JS_UNPACK_STR(value, ctx, jsValue);
             msg->type = GetParkMessageType(value);
         }
         return JS_UNDEFINED;
@@ -136,10 +144,12 @@ namespace OpenRCT2::Scripting
 
     JSValue ScParkMessage::subject_set(JSContext* ctx, JSValue thisVal, JSValue jsValue)
     {
+        JS_UNPACK_UINT32(value, ctx, jsValue);
+        JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
+
         auto msg = GetMessage(thisVal);
         if (msg != nullptr)
         {
-            JS_UNPACK_UINT32(value, ctx, jsValue);
             msg->assoc = value;
         }
         return JS_UNDEFINED;
@@ -152,21 +162,23 @@ namespace OpenRCT2::Scripting
         {
             return JSFromStdString(ctx, msg->text);
         }
-        return JS_UNDEFINED;
+        return JSFromStdString(ctx, {});
     }
 
     JSValue ScParkMessage::text_set(JSContext* ctx, JSValue thisVal, JSValue jsValue)
     {
+        JS_UNPACK_STR(value, ctx, jsValue);
+        JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
+
         auto msg = GetMessage(thisVal);
         if (msg != nullptr)
         {
-            JS_UNPACK_STR(value, ctx, jsValue);
             msg->text = value;
         }
         return JS_UNDEFINED;
     }
 
-    JSValue ScParkMessage::remove(JSContext*, JSValue thisVal, int, JSValue*)
+    JSValue ScParkMessage::remove(JSContext* ctx, JSValue thisVal, int argc, JSValue* argv)
     {
         auto index = gScParkMessage.GetOpaque<OpaqueParkMessageData*>(thisVal)->index;
         News::RemoveItem(static_cast<int32_t>(index));
@@ -186,7 +198,7 @@ namespace OpenRCT2::Scripting
             JS_CFUNC_DEF("remove", 0, ScParkMessage::remove),
         };
 
-        return MakeWithOpaque(ctx, funcs, nullptr);
+        return MakeWithOpaque(ctx, funcs, new OpaqueParkMessageData{ index });
     }
 
     void ScParkMessage::Register(JSContext* ctx)

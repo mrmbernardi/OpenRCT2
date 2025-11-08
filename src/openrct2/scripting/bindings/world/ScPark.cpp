@@ -360,15 +360,16 @@ namespace OpenRCT2::Scripting
     JSValue ScPark::messages_get(JSContext* ctx, JSValue thisVal)
     {
         JSValue result = JS_NewArray(ctx);
+        int64_t resultIdx = 0;
         auto& gameState = getGameState();
         for (size_t i = 0, newsSize = gameState.newsItems.GetRecent().size(); i < newsSize; i++)
         {
-            JS_SetPropertyInt64(ctx, result, i, gScParkMessage.New(ctx, i));
+            JS_SetPropertyInt64(ctx, result, resultIdx++, gScParkMessage.New(ctx, i));
         }
         for (size_t i = 0, newsSize = gameState.newsItems.GetArchived().size(); i < newsSize; i++)
         {
             auto offset = i + News::ItemHistoryStart;
-            JS_SetPropertyInt64(ctx, result, offset, gScParkMessage.New(ctx, offset));
+            JS_SetPropertyInt64(ctx, result, resultIdx++, gScParkMessage.New(ctx, offset));
         }
         return result;
     }
@@ -413,23 +414,32 @@ namespace OpenRCT2::Scripting
 
     JSValue ScPark::postMessage(JSContext* ctx, JSValue thisVal, int argc, JSValue* argv)
     {
+        JS_THROW_IF_GAME_STATE_NOT_MUTABLE();
+
         uint32_t assoc = std::numeric_limits<uint32_t>::max();
         auto type = News::ItemType::blank;
         std::string text;
-        if (JS_IsString(thisVal))
+        if (JS_IsString(argv[0]))
         {
-            text = JSToStdString(ctx, thisVal);
+            text = JSToStdString(ctx, argv[0]);
         }
         else
         {
-            type = GetParkMessageType(JSToStdString(ctx, thisVal, "type"));
-            text = JSToStdString(ctx, thisVal, "text");
+            auto textOption = JSToOptionalStdString(ctx, argv[0], "text");
+            auto typeOption = JSToOptionalStdString(ctx, argv[0], "type");
+            if (!textOption.has_value() || !typeOption.has_value())
+            {
+                return JS_ThrowPlainError(ctx, "Invalid message argument.");
+            }
+
+            type = GetParkMessageType(typeOption.value());
+            text = textOption.value();
             if (type == News::ItemType::blank)
             {
                 assoc = static_cast<uint32_t>(((kCoordsNull & 0xFFFF) << 16) | (kCoordsNull & 0xFFFF));
             }
 
-            auto subject = JS_GetPropertyStr(ctx, thisVal, "subject");
+            auto subject = JS_GetPropertyStr(ctx, argv[0], "subject");
             if (JS_IsNumber(subject))
             {
                 assoc = JSToUint(ctx, subject);

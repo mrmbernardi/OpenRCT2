@@ -86,7 +86,7 @@ namespace OpenRCT2::Scripting
         static JSValue text_get(JSContext* ctx, JSValue thisVal);
         static JSValue text_set(JSContext* ctx, JSValue thisVal, JSValue jsValue);
 
-        static JSValue remove(JSContext*, JSValue thisVal, int, JSValue*);
+        static JSValue remove(JSContext* ctx, JSValue thisVal, int argc, JSValue* argv);
 
     public:
         JSValue New(JSContext* ctx, size_t index);
