@@ -1910,8 +1910,10 @@ void ScriptEngine::UpdateSockets()
     #ifndef DISABLE_NETWORK
     // AddSocket and RemoveSocket can be called as a result of the Update
     // Therefore we add to the end and remove by setting to null and cleaning up
-    // after the update. We also must use [] here.
-    for (size_t i = 0; i < _sockets.size(); i++)
+    // after the update. We also must use [] here and we remember the original
+    // sockets vector size so that we process new ones in the next tick.
+    const size_t sz = _sockets.size();
+    for (size_t i = 0; i < sz; i++)
     {
         if (_sockets[i] != nullptr)
             _sockets[i]->Update();
