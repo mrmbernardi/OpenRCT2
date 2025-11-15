@@ -16,6 +16,7 @@
     #include <any>
     #include <memory>
     #include <string>
+    #include <variant>
     #include <vector>
 
 namespace OpenRCT2::Scripting
@@ -47,6 +48,14 @@ namespace OpenRCT2::Scripting
     };
     constexpr size_t NUM_HookTypeS = static_cast<size_t>(HookType::count);
     HookType GetHookType(const std::string& name);
+
+    using HookValue = std::variant<int32_t, int16_t, uint16_t, std::string>;
+
+    template<class... Ts>
+    struct HookValuesToJS : Ts...
+    {
+        using Ts::operator()...;
+    };
 
     struct Hook
     {
@@ -90,9 +99,8 @@ namespace OpenRCT2::Scripting
         bool HasSubscriptions(HookType type) const;
         bool IsValidHookForPlugin(HookType type, Plugin& plugin) const;
         void Call(HookType type, bool isGameStateMutable);
-        void Call(HookType type, JSValue arg, bool isGameStateMutable);
-        void Call(
-            HookType type, const std::initializer_list<std::pair<std::string_view, std::any>>& args, bool isGameStateMutable);
+        void Call(HookType type, JSValue arg, bool isGameStateMutable, bool keepArgsAlive = false);
+        void Call(HookType type, const std::initializer_list<std::pair<std::string, HookValue>>& args, bool isGameStateMutable);
 
     private:
         HookList& GetHookList(HookType type);

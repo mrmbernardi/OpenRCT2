@@ -117,17 +117,17 @@ void HookEngine::Call(HookType type, bool isGameStateMutable)
     }
 }
 
-void HookEngine::Call(HookType type, const JSValue arg, bool isGameStateMutable)
+void HookEngine::Call(HookType type, const JSValue arg, bool isGameStateMutable, bool keepArgsAlive)
 {
     auto& hookList = GetHookList(type);
     for (auto& hook : hookList.Hooks)
     {
-        _scriptEngine.ExecutePluginCall(hook.Owner, hook.Function.callback, { arg }, isGameStateMutable);
+        _scriptEngine.ExecutePluginCall(hook.Owner, hook.Function.callback, { arg }, isGameStateMutable, keepArgsAlive);
     }
 }
 
 void HookEngine::Call(
-    HookType type, const std::initializer_list<std::pair<std::string_view, std::any>>& args, bool isGameStateMutable)
+    HookType type, const std::initializer_list<std::pair<std::string, HookValue>>& args, bool isGameStateMutable)
 {
     auto& hookList = GetHookList(type);
     for (auto& hook : hookList.Hooks)
@@ -138,22 +138,17 @@ void HookEngine::Call(
         JSValue obj = JS_NewObject(ctx);
         for (const auto& arg : args)
         {
-            JSValue member;
-            if (arg.second.type() == typeid(int32_t))
-            {
-                auto val = std::any_cast<int32_t>(arg.second);
-                member = JS_NewInt32(ctx, val);
-            }
-            else if (arg.second.type() == typeid(std::string))
-            {
-                const auto& val = std::any_cast<std::string>(arg.second);
-                member = JSFromStdString(ctx, val.c_str());
-            }
-            else
-            {
-                throw std::runtime_error("Not implemented");
-            }
-            JS_SetPropertyStr(ctx, obj, std::string(arg.first).c_str(), member);
+            JSValue member = std::visit(
+                HookValuesToJS{
+                    [ctx](int64_t v) { return JS_NewInt64(ctx, v); },
+                    [ctx](uint32_t v) { return JS_NewInt64(ctx, v); },
+                    [ctx](int32_t v) { return JS_NewInt32(ctx, v); },
+                    [ctx](uint16_t v) { return JS_NewInt32(ctx, v); },
+                    [ctx](int16_t v) { return JS_NewInt32(ctx, v); },
+                    [ctx](const std::string& v) { return JSFromStdString(ctx, v); },
+                },
+                arg.second);
+            JS_SetPropertyStr(ctx, obj, arg.first.c_str(), member);
         }
 
         _scriptEngine.ExecutePluginCall(hook.Owner, hook.Function.callback, { obj }, isGameStateMutable);
