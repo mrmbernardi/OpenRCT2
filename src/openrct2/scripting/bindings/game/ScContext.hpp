@@ -261,7 +261,7 @@ namespace OpenRCT2::Scripting
         static JSValue subscribe(JSContext* ctx, JSValue thisVal, int argc, JSValue* argv)
         {
             JS_UNPACK_STR(hook, ctx, argv[0]);
-            JSValue callback = argv[1];
+            JS_UNPACK_CALLBACK(callback, ctx, argv[1]);
 
             auto& scriptEngine = GetContext()->GetScriptEngine();
 
@@ -269,12 +269,6 @@ namespace OpenRCT2::Scripting
             if (hookType == HookType::notDefined)
             {
                 JS_ThrowPlainError(ctx, "Unknown hook type");
-                return JS_EXCEPTION;
-            }
-
-            if (!JS_IsFunction(ctx, callback))
-            {
-                JS_ThrowPlainError(ctx, "Expected function for callback");
                 return JS_EXCEPTION;
             }
 
