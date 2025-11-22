@@ -213,7 +213,7 @@ namespace OpenRCT2::GameActions
         REGISTER_ACTION(GameSetSpeedAction);
         REGISTER_ACTION(ScenerySetRestrictedAction);
         REGISTER_ACTION(RideSetVisibilityAction);
-#ifdef ENABLE_SCRIPTING
+#ifdef ENABLE_SCRIPTING_REFACTOR
         REGISTER_ACTION(CustomAction);
 #endif
 
