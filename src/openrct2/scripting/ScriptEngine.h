@@ -9,7 +9,7 @@
 
 #pragma once
 
-#ifdef ENABLE_SCRIPTING_REFACTOR
+#ifdef ENABLE_SCRIPTING
 
     #include "../actions/general/CustomAction.h"
     #include "../core/FileWatcher.h"

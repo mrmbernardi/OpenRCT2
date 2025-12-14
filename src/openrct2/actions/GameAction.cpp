@@ -31,7 +31,7 @@ namespace OpenRCT2::GameActions
         auto result = MapIsLocationValid(coords);
         if (!result)
             return false;
-#ifdef ENABLE_SCRIPTING_REFACTOR
+#ifdef ENABLE_SCRIPTING
         auto& hookEngine = GetContext()->GetScriptEngine().GetHookEngine();
         if (hookEngine.HasSubscriptions(Scripting::HookType::actionLocation))
         {
