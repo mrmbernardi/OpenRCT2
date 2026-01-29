@@ -1088,6 +1088,13 @@ void ScriptEngine::Tick()
 
     PROFILED_FUNCTION();
 
+    JSContext* jobCtx;
+    while (true)
+    {
+        if (JS_ExecutePendingJob(_runtime, &jobCtx) == 0)
+            break;
+    }
+
     CheckAndStartPlugins();
     UpdateIntervals();
     UpdateSockets();
