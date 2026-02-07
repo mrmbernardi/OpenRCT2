@@ -184,8 +184,8 @@ namespace OpenRCT2::Scripting
 
             if (JS_IsObject(colours))
             {
-                entity->colour[0] = JSToUint(ctx, colours, "body");
-                entity->colour[1] = JSToUint(ctx, colours, "trim");
+                entity->colour[0] = static_cast<Drawing::Colour>(JSToUint(ctx, colours, "body"));
+                entity->colour[1] = static_cast<Drawing::Colour>(JSToUint(ctx, colours, "trim"));
             }
             if (JS_IsObject(acceleration))
             {
@@ -246,8 +246,8 @@ namespace OpenRCT2::Scripting
         auto entity = GetCrashedVehicleParticle(thisVal);
         if (entity != nullptr)
         {
-            entity->colour[0] = JSToUint(ctx, obj, "body");
-            entity->colour[1] = JSToUint(ctx, obj, "trim");
+            entity->colour[0] = static_cast<Drawing::Colour>(JSToUint(ctx, obj, "body"));
+            entity->colour[1] = static_cast<Drawing::Colour>(JSToUint(ctx, obj, "trim"));
             entity->Invalidate();
         }
         return JS_UNDEFINED;

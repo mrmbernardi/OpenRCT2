@@ -250,7 +250,7 @@ namespace OpenRCT2::Scripting
             int64_t i = 0;
             for (auto c : w->colours)
             {
-                auto colour = c.colour;
+                auto colour = EnumValue(c.colour);
                 if (c.flags.has(ColourFlag::translucent))
                     colour |= kLegacyColourFlagTranslucent;
 
@@ -278,7 +278,7 @@ namespace OpenRCT2::Scripting
                         JS_ToInt32(ctx, &colorInt, elem);
                         uint8_t colour = colorInt & ~kLegacyColourFlagTranslucent % Drawing::kColourNumTotal;
                         bool isTranslucent = (colorInt & kLegacyColourFlagTranslucent);
-                        c.colour = static_cast<Colour>(colour);
+                        c.colour = static_cast<Drawing::Colour>(colour);
                         c.flags.set(ColourFlag::translucent, isTranslucent);
                     }
                     JS_FreeValue(ctx, elem);

@@ -686,7 +686,7 @@ namespace OpenRCT2::Scripting
             auto w = GetWindow(data._class, data._number);
             if (w != nullptr)
             {
-                Ui::Windows::UpdateWidgetColour(w, data._widgetIndex, static_cast<Colour>(valueInt));
+                UpdateWidgetColour(w, data._widgetIndex, static_cast<Drawing::Colour>(valueInt));
                 Invalidate(thisVal);
             }
             return JS_UNDEFINED;

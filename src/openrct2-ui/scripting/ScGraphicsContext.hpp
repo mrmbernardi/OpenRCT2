@@ -211,7 +211,8 @@ namespace OpenRCT2::Scripting
             JS_UNPACK_INT32(height, ctx, argv[3]);
             GraphicsData* data = gScGraphicsContext.GetOpaque<GraphicsData*>(thisVal);
 
-            Rectangle::fillInset(data->_rt, { x, y, x + width - 1, y + height - 1 }, { static_cast<Colour>(data->_colour.value_or(0)) });
+            Rectangle::fillInset(
+                data->_rt, { x, y, x + width - 1, y + height - 1 }, { static_cast<Colour>(data->_colour.value_or(0)) });
             return JS_UNDEFINED;
         }
 
