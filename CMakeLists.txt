@@ -48,7 +48,8 @@ if (APPLE)
     set(CMAKE_SYSTEM_PROCESSOR "${CMAKE_OSX_ARCHITECTURES}" CACHE STRING "")
 endif ()
 
-project(openrct2 CXX)
+# C Language required for quickjs-ng
+project(openrct2 CXX C)
 
 include(cmake/platform.cmake)
 include(CMakeDependentOption)
@@ -267,7 +268,7 @@ endfunction ()
 
 # Add check flags to a compile TARGET
 function (SET_CHECK_CXX_FLAGS _TARGET)
-    target_compile_options("${_TARGET}" PRIVATE "${SUPPORTED_CHECK_CXX_COMPILER_FLAGS}")
+    target_compile_options("${_TARGET}" PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${SUPPORTED_CHECK_CXX_COMPILER_FLAGS}>)
 endfunction()
 
 # Check if a flag exists and add it to the compiler and the linker options

@@ -124,7 +124,7 @@ private:
         {
             _ss << (JS_VALUE_GET_BOOL(val) ? "true" : "false");
         }
-        else if (JS_IsNumber(val) || JS_IsBigInt(_context, val))
+        else if (JS_IsNumber(val) || JS_IsBigInt(val))
         {
             StringifyNumber(val);
         }
@@ -142,7 +142,7 @@ private:
             {
                 StringifyArray(val, canStartWithNewLine, nestLevel);
             }
-            else if (JS_IsError(_context, val))
+            else if (JS_IsError(val))
             {
                 StringifyError(val);
             }

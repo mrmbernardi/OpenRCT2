@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(openrct2-android CXX)
+project(openrct2-android CXX C)
 
 set(CMAKE_VERBOSE_MAKEFILE on)
 
@@ -226,6 +226,7 @@ if (CCache_FOUND)
 endif (CCache_FOUND)
 
 file(GLOB_RECURSE LIBOPENRCT2_SOURCES
+    "${ORCT2_ROOT}/src/thirdparty/quickjs-ng/quickjs-amalgam.c"
     "${ORCT2_ROOT}/src/openrct2/*.cpp"
     "${ORCT2_ROOT}/src/openrct2/*.h"
     "${ORCT2_ROOT}/src/openrct2/*.hpp")
@@ -254,7 +255,9 @@ target_link_libraries(openrct2-ui openrct2 android stdc++ GLESv1_CM GLESv2 SDL2m
 add_executable(openrct2-cli ${OPENRCT2_CLI_SOURCES})
 target_link_libraries(openrct2-cli openrct2 android stdc++ GLESv1_CM GLESv2)
 
+target_include_directories(openrct2 SYSTEM PRIVATE "${ORCT2_ROOT}/src/thirdparty/quickjs-ng")
 target_include_directories(openrct2 SYSTEM PRIVATE "${ORCT2_ROOT}/src/thirdparty")
+target_include_directories(openrct2-ui SYSTEM PRIVATE "${ORCT2_ROOT}/src/thirdparty/quickjs-ng")
 target_include_directories(openrct2-ui PRIVATE "${ORCT2_ROOT}/src")
 target_include_directories(openrct2-ui SYSTEM PRIVATE "${ORCT2_ROOT}/src/thirdparty")
 target_include_directories(openrct2-cli PRIVATE "${ORCT2_ROOT}/src")
@@ -262,26 +265,3 @@ target_include_directories(openrct2-cli SYSTEM PRIVATE "${ORCT2_ROOT}/src/thirdp
 
 target_include_directories(openrct2 PRIVATE "/opt/openrct2/include/nlohmann/../")
 target_include_directories(openrct2-ui PRIVATE "/opt/openrct2/include/nlohmann/../")
-
-set(QUICKJS_CMAKE_ARGS
-        "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
-        "-DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE}"
-        "-DCMAKE_SYSTEM_PROCESSOR=${CMAKE_SYSTEM_PROCESSOR}"
-        "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
-        "-DANDROID_ABI=${ANDROID_ABI}"
-        "-DANDROID_PLATFORM=${ANDROID_PLATFORM}"
-        "-DANDROID_NDK=${ANDROID_NDK}"
-)
-
-externalproject_add(quickjs
-        GIT_REPOSITORY https://github.com/quickjs-ng/quickjs.git
-        GIT_TAG 3c9afc9943323ee9c7dbd123c0cd991448f4b6c2
-        CMAKE_ARGS ${QUICKJS_CMAKE_ARGS}
-        INSTALL_COMMAND ""
-        BUILD_BYPRODUCTS "quickjs-prefix/src/quickjs-build/libqjs.a"
-)
-externalproject_get_property(quickjs SOURCE_DIR)
-target_include_directories(openrct2 SYSTEM PUBLIC ${SOURCE_DIR})
-externalproject_get_property(quickjs BINARY_DIR)
-target_link_libraries(openrct2 ${BINARY_DIR}/libqjs.a)
-add_dependencies(openrct2 quickjs)
