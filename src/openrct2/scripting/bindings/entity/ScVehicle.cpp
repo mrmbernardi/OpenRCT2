@@ -84,8 +84,7 @@ namespace OpenRCT2::Scripting
             JS_CGETSET_DEF(
                 "isReversed", &ScVehicle::flag_get<VehicleFlag::carIsReversed>,
                 &ScVehicle::flag_set<VehicleFlag::carIsReversed>),
-            JS_CGETSET_DEF(
-                "isCrashed", &ScVehicle::flag_get<VehicleFlag::crashed>, &ScVehicle::flag_set<VehicleFlag::crashed>),
+            JS_CGETSET_DEF("isCrashed", &ScVehicle::flag_get<VehicleFlag::crashed>, &ScVehicle::flag_set<VehicleFlag::crashed>),
             JS_CGETSET_DEF("colours", &ScVehicle::colours_get, &ScVehicle::colours_set),
             JS_CGETSET_DEF("trackLocation", &ScVehicle::trackLocation_get, nullptr),
             JS_CGETSET_DEF("trackProgress", &ScVehicle::trackProgress_get, nullptr),

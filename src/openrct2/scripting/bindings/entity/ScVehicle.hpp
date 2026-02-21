@@ -13,6 +13,7 @@
 
     #include "../../../entity/EntityTweener.h"
     #include "../../../ride/Ride.h"
+    #include "../../../ride/Vehicle.h"
     #include "ScEntity.hpp"
 
     #include <optional>

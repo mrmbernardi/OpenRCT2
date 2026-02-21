@@ -21,11 +21,28 @@
     #include <openrct2/Context.h>
     #include <openrct2/scripting/IconNames.hpp>
     #include <openrct2/scripting/ScriptEngine.h>
-    #include <openrct2/scripting/bindings/game/ScContext.hpp>
     #include <openrct2/ui/WindowManager.h>
 
 namespace OpenRCT2::Scripting
 {
+    inline uint32_t ImageFromJSValue(JSContext* ctx, JSValue value)
+    {
+        uint32_t img{};
+        if (JS_IsNumber(value))
+        {
+            JS_ToUint32(ctx, &img, value);
+            if (GetTargetAPIVersion() <= kApiVersionG2Reorder)
+            {
+                img = NewIconIndex(img);
+            }
+        }
+        else if (JS_IsString(value))
+        {
+            img = GetIconByName(JSToStdString(ctx, value));
+        }
+        return img;
+    }
+
     class ScWidget;
     extern ScWidget gScWidget;
 

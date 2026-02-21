@@ -453,24 +453,6 @@ namespace OpenRCT2::Scripting
             return MakeWithOpaque(ctx, funcs, nullptr);
         }
     };
-
-    inline uint32_t ImageFromJSValue(JSContext* ctx, JSValue value)
-    {
-        uint32_t img{};
-        if (JS_IsNumber(value))
-        {
-            JS_ToUint32(ctx, &img, value);
-            if (GetTargetAPIVersion() <= kApiVersionG2Reorder)
-            {
-                img = NewIconIndex(img);
-            }
-        }
-        else if (JS_IsString(value))
-        {
-            img = GetIconByName(JSToStdString(ctx, value));
-        }
-        return img;
-    }
 } // namespace OpenRCT2::Scripting
 
 #endif
