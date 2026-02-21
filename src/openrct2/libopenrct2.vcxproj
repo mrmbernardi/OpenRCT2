@@ -1233,6 +1233,12 @@
     <ClCompile Include="world\tile_element\TrackElement.cpp" />
     <ClCompile Include="world\tile_element\WallElement.cpp" />
     <ClCompile Include="world\Wall.cpp" />
+    <ClCompile Include="..\thirdparty\quickjs-ng\quickjs-amalgam.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ForcedIncludeFiles>
+      </ForcedIncludeFiles>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\openrct2-deps\openrct2-deps.vcxproj">
