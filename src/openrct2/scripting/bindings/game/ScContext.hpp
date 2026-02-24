@@ -200,7 +200,7 @@ namespace OpenRCT2::Scripting
             for (uint16_t type = 0; type < EnumValue(TrackElemType::count); type++)
             {
                 auto obj = gScTrackSegment.New(ctx, static_cast<TrackElemType>(type));
-                JS_GetPropertyInt64(ctx, obj, index);
+                JS_SetPropertyInt64(ctx, result, index++, obj);
             }
             return result;
         }
