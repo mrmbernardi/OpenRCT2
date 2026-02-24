@@ -316,7 +316,7 @@ namespace OpenRCT2::Ui::Windows
                 if (JS_IsNumber(x))
                 {
                     int32_t xValue = JSToInt(ctx2, x);
-                    uint8_t colour = xValue & ~kLegacyColourFlagTranslucent % kColourNumTotal;
+                    uint8_t colour = (xValue & ~kLegacyColourFlagTranslucent) % kColourNumTotal;
                     bool isTranslucent = (xValue & kLegacyColourFlagTranslucent);
                     c.colour = static_cast<Colour>(colour);
                     c.flags.set(ColourFlag::translucent, isTranslucent);

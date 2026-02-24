@@ -276,7 +276,7 @@ namespace OpenRCT2::Scripting
                     {
                         int32_t colorInt = -1;
                         JS_ToInt32(ctx, &colorInt, elem);
-                        uint8_t colour = colorInt & ~kLegacyColourFlagTranslucent % Drawing::kColourNumTotal;
+                        uint8_t colour = (colorInt & ~kLegacyColourFlagTranslucent) % Drawing::kColourNumTotal;
                         bool isTranslucent = (colorInt & kLegacyColourFlagTranslucent);
                         c.colour = static_cast<Drawing::Colour>(colour);
                         c.flags.set(ColourFlag::translucent, isTranslucent);
