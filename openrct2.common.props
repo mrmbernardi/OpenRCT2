@@ -65,7 +65,8 @@
       <RuntimeLibrary Condition="'$(UseSharedLibs)'=='true'">MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalOptions>/utf-8 /std:c++20 /permissive- /Zc:externConstexpr /Zc:char8_t-</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /permissive- /Zc:externConstexpr /Zc:char8_t-</AdditionalOptions>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <LargeAddressAware Condition="'$(Platform)'=='Win32'">true</LargeAddressAware>

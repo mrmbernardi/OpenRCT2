@@ -1234,10 +1234,11 @@
     <ClCompile Include="world\tile_element\WallElement.cpp" />
     <ClCompile Include="world\Wall.cpp" />
     <ClCompile Include="..\thirdparty\quickjs-ng\quickjs-amalgam.c">
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <ForcedIncludeFiles>
-      </ForcedIncludeFiles>
+      <CompileAs>CompileAsC</CompileAs>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
       <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <AdditionalOptions>/experimental:c11atomics %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
